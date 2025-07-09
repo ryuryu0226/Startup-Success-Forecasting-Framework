@@ -134,7 +134,8 @@ def getquantDecision(prediction, Founder_Idea_Fit, Founder_Segmentation, final_d
         L4 & 514 & 249 & 67.37\% & 2.78 \\
         L5 & 93 & 8 & 92.08\% & 3.79 \\
         
-        Regarding the Founder-Idea-Fit Score. Relevant context are provided here: 
+        Regarding the Founder-Idea-Fit Score. Relevant context are provided here:
+
         The previous sections show the strong correlation between founder's segmentation level and startup's outcome, as L5 founders are more than three times likely to succeed than L1 founders. However, looking into the data, one could also see that there are L5 founders who did not succeed, and there are L1 founders who succeeded. To account for these scenarios, we investigate the fit between founders and their ideas.
         
         To assess quantitatively, we propose a metric called Founder-Idea Fit Score (FIFS). The Founder-Idea Fit Score quantitatively assesses the compatibility between a founder's experience level and the success of their startup idea. Given the revised Preliminary Fit Score ($PFS$) defined as:
