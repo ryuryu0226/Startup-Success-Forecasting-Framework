@@ -14,7 +14,12 @@ from schemas.founder_schema import FounderAnalysis, AdvancedFounderAnalysis, Fou
 class FounderAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
         super().__init__(model)
-        self.neural_network = load_model(os.path.join(project_root, 'models', 'neural_network.keras'))
+        try:
+            self.neural_network = load_model(os.path.join(project_root, 'models', 'neural_network.keras'))
+        except Exception as e:
+            print(f"Warning: Could not load neural network model: {e}")
+            print("The founder agent will continue without neural network support.")
+            self.neural_network = None
 
     def analyze(self, startup_info, mode):
         founder_info = self._get_founder_info(startup_info)
@@ -54,7 +59,11 @@ class FounderAgent(BaseAgent):
         X_new = np.concatenate([X_new_embeddings, X_new_embeddings_2, X_new_cosine], axis=1)
 
         # Predict using the neural network
-        idea_fit = self.neural_network.predict(X_new)[0][0]
+        if self.neural_network is not None:
+            idea_fit = self.neural_network.predict(X_new)[0][0]
+        else:
+            # Fallback: use cosine similarity as a simple approximation
+            idea_fit = cosine_sim
         return float(idea_fit), cosine_sim
 
     def _calculate_cosine_similarity(self, vec1, vec2):

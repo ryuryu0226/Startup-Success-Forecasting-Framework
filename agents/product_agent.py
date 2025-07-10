@@ -23,9 +23,10 @@ class ProductAgent(BaseAgent):
         
         # Add file handler for external knowledge logging
         self.external_knowledge_logger = logging.getLogger(f"{__name__}.external_knowledge")
-        file_handler = logging.FileHandler('experiments/product_external_knowledge.log')
-        file_handler.setFormatter(formatter)
-        self.external_knowledge_logger.addHandler(file_handler)
+        # Use console handler instead of file handler to avoid directory issues
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        self.external_knowledge_logger.addHandler(console_handler)
         self.external_knowledge_logger.setLevel(logging.INFO)
 
     def analyze(self, startup_info, mode):
