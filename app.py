@@ -1,7 +1,9 @@
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
 import sys
 import os
 import traceback
+from typing import Any, Optional
 
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -9,7 +11,7 @@ sys.path.insert(0, project_root)
 
 from ssff_framework import StartupFramework
 
-def main():
+def main() -> None:
     st.title("Startup Success Forecasting Framework")
 
     # Initialize the StartupFramework
@@ -30,13 +32,17 @@ def main():
         else:
             st.warning("Please enter startup information before analyzing.")
 
-def analyze_startup_with_updates(framework: StartupFramework, startup_info_str, placeholder):
+def analyze_startup_with_updates(
+    framework: StartupFramework,
+    startup_info_str: str,
+    placeholder: DeltaGenerator,
+) -> Optional[dict[str, Any]]:
     with placeholder.container():
         st.write("### Analysis in Progress")
         progress_bar = st.progress(0)
         status_text = st.empty()
 
-        def update_status(step, progress):
+        def update_status(step: str, progress: float) -> None:
             status_text.text(f"Step: {step}")
             progress_bar.progress(progress)
 
@@ -104,7 +110,7 @@ def analyze_startup_with_updates(framework: StartupFramework, startup_info_str, 
         
         return result
 
-def display_final_results(result, mode):
+def display_final_results(result: dict[str, Any], mode: str) -> None:
     st.subheader("Final Analysis Results")
 
     # Display Final Decision
