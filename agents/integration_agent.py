@@ -1,24 +1,13 @@
 import os
 import sys
 import logging
-from pydantic import BaseModel, Field
 
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from agents.base_agent import BaseAgent
-
-class IntegratedAnalysis(BaseModel):
-    overall_score: float = Field(..., description="Overall score between 1 and 10, 10 being the best")
-    IntegratedAnalysis: str = Field(..., description="A comprehensive analysis of the startup from the perspective of the venture capital firm, after integrating all the information")
-    recommendation: str = Field(..., description="A brief recommendation for next steps")
-    outcome: str = Field(..., description="The outcome for prediction: 'Invest' or 'Hold' ")
-
-class QuantitativeDecision(BaseModel):
-    outcome: str = Field(..., description="Predicted outcome: 'Successful' or 'Unsuccessful'")
-    probability: float = Field(..., description="Probability of the predicted outcome")
-    reasoning: str = Field(..., description="One-line reasoning for the decision")
+from schemas.integration_schema import IntegratedAnalysis, QuantitativeDecision
 
 class IntegrationAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):

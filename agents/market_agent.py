@@ -8,14 +8,7 @@ sys.path.insert(0, project_root)
 
 from agents.base_agent import BaseAgent
 from utils.api_wrapper import GoogleSearchAPI
-from pydantic import BaseModel, Field
-
-class MarketAnalysis(BaseModel):
-    market_size: str = Field(..., description="Estimated market size")
-    growth_rate: str = Field(..., description="Market growth rate")
-    competition: str = Field(..., description="Overview of competition")
-    market_trends: str = Field(..., description="Key market trends")
-    viability_score: int = Field(..., description="Market viability score on a scale of 1 to 10")
+from schemas.market_schema import MarketAnalysis
 
 class MarketAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):

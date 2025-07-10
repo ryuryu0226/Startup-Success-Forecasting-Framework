@@ -3,65 +3,14 @@ import sys
 import logging
 import joblib
 import pandas as pd
-from pydantic import BaseModel, Field
-from typing import Optional, Tuple
-import json
+from typing import Tuple
 
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from agents.base_agent import BaseAgent
-
-class StartupInfo(BaseModel):
-    name: str = Field(..., description="The official name of the startup")
-    description: str = Field(..., description="A brief overview of what the startup does")
-    market_size: Optional[str] = Field(None, description="The size of the market the startup is targeting")
-    growth_rate: Optional[str] = Field(None, description="The growth rate of the market")
-    competition: Optional[str] = Field(None, description="Key competitors in the space")
-    market_trends: Optional[str] = Field(None, description="Current trends within the market")
-    go_to_market_strategy: Optional[str] = Field(None, description="The startup's plan for entering the market")
-    product_details: Optional[str] = Field(None, description="Details about the startup's product or service")
-    technology_stack: Optional[str] = Field(None, description="Technologies used in the product")
-    scalability: Optional[str] = Field(None, description="How the product can scale")
-    user_feedback: Optional[str] = Field(None, description="Any feedback received from users")
-    product_fit: Optional[str] = Field(None, description="How well the product fits the target market")
-    founder_backgrounds: Optional[str] = Field(None, description="Background information on the founders")
-    track_records: Optional[str] = Field(None, description="The track records of the founders")
-    leadership_skills: Optional[str] = Field(None, description="Leadership skills of the team")
-    vision_alignment: Optional[str] = Field(None, description="How the team's vision aligns with the product")
-    team_dynamics: Optional[str] = Field(None, description="The dynamics within the startup team")
-    web_traffic_growth: Optional[str] = Field(None, description="Information on the growth of web traffic to the startup's site")
-    social_media_presence: Optional[str] = Field(None, description="The startup's presence on social media")
-    investment_rounds: Optional[str] = Field(None, description="Details of any investment rounds")
-    regulatory_approvals: Optional[str] = Field(None, description="Any regulatory approvals obtained")
-    patents: Optional[str] = Field(None, description="Details of any patents held by the startup")
-
-class StartupCategorization(BaseModel):
-    industry_growth: str = Field(..., description="Is the startup operating in an industry experiencing growth? [Yes/No/N/A]")
-    market_size: str = Field(..., description="Is the target market size for the startup's product/service considered large? [Small/Medium/Large/N/A]")
-    development_pace: str = Field(..., description="Does the startup demonstrate a fast pace of development compared to competitors? [Slower/Same/Faster/N/A]")
-    market_adaptability: str = Field(..., description="Is the startup considered adaptable to market changes? [Not Adaptable/Somewhat Adaptable/Very Adaptable/N/A]")
-    execution_capabilities: str = Field(..., description="How would you rate the startup's execution capabilities? [Poor/Average/Excellent/N/A]")
-    funding_amount: str = Field(..., description="Has the startup raised a significant amount of funding in its latest round? [Below Average/Average/Above Average/N/A]")
-    valuation_change: str = Field(..., description="Has the startup's valuation increased with time? [Decreased/Remained Stable/Increased/N/A]")
-    investor_backing: str = Field(..., description="Are well-known investors or venture capital firms backing the startup? [Unknown/Recognized/Highly Regarded/N/A]")
-    reviews_testimonials: str = Field(..., description="Are the reviews and testimonials for the startup predominantly positive? [Negative/Mixed/Positive/N/A]")
-    product_market_fit: str = Field(..., description="Do market surveys indicate a strong product-market fit for the startup? [Weak/Moderate/Strong/N/A]")
-    sentiment_analysis: str = Field(..., description="Does the sentiment analysis of founder and company descriptions suggest high positivity? [Negative/Neutral/Positive/N/A]")
-    innovation_mentions: str = Field(..., description="Are terms related to innovation frequently mentioned in the company's public communications? [Rarely/Sometimes/Often/N/A]")
-    cutting_edge_technology: str = Field(..., description="Does the startup mention cutting-edge technology in its descriptions? [No/Mentioned/Emphasized/N/A]")
-    timing: str = Field(..., description="Considering the startup's industry and current market conditions, is the timing for the startup's product or service right? [Too Early/Just Right/Too Late/N/A]")
-
-class StartupEvaluation(BaseModel):
-    market_opportunity: str = Field(..., description="Assessment of the market opportunity")
-    product_innovation: str = Field(..., description="Evaluation of product innovation")
-    founding_team: str = Field(..., description="Analysis of the founding team")
-    potential_risks: str = Field(..., description="Identification of potential risks")
-    overall_potential: int = Field(..., description="Overall potential score on a scale of 1 to 10")
-    investment_recommendation: str = Field(None, description="Investment recommendation: 'Invest' or 'Pass'")
-    confidence: float = Field(None, description="Confidence level in the recommendation (0 to 1)")
-    rationale: str = Field(None, description="Brief explanation for the recommendation")
+from schemas.vc_scout_schema import StartupInfo, StartupCategorization, StartupEvaluation
 
 class VCScoutAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
