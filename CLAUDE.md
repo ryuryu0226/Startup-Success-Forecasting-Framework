@@ -83,6 +83,13 @@ project_root/
 │   ├── neural_network.keras
 │   ├── random_forest_classifier.joblib
 │   └── trained_encoder_RF.joblib
+├── schemas/                 # Pydanticスキーマ定義
+│   ├── __init__.py
+│   ├── founder_schemas.py
+│   ├── integration_schemas.py
+│   ├── market_schemas.py
+│   ├── product_schemas.py
+│   └── vc_scout_schemas.py
 ├── utils/                   # ユーティリティスクリプト
 │   ├── api_wrapper.py
 │   └── config.py
@@ -142,3 +149,11 @@ project_root/
 - `models/neural_network.keras`: 訓練済みニューラルネットワーク
 - `models/random_forest_classifier.joblib`: 訓練済みランダムフォレスト
 - `models/trained_encoder_RF.joblib`: 特徴量エンコーダー
+
+### Pydanticスキーマ定義
+
+- `schemas/founder_schemas.py`: 創業者分析関連スキーマ（FounderAnalysis、AdvancedFounderAnalysis、FounderSegmentation）
+- `schemas/integration_schemas.py`: 統合分析関連スキーマ（IntegratedAnalysis、QuantitativeDecision）
+- `schemas/market_schemas.py`: 市場分析関連スキーマ（MarketAnalysis）
+- `schemas/product_schemas.py`: プロダクト分析関連スキーマ（ProductAnalysis）
+- `schemas/vc_scout_schemas.py`: VC評価関連スキーマ（StartupInfo、StartupCategorization、StartupEvaluation）
