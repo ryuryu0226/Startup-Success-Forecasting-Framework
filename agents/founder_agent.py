@@ -91,8 +91,7 @@ class FounderAgent(BaseAgent):
         L2: Entrepreneurs with a few years of experience or accelerator graduates.
         L1: Entrepreneurs with negligible experience but large potential.
 
-        Based on the following information, determine the appropriate level:
-        {founder_info}
+        Based on the founder information provided, determine the appropriate level.
         """
 
 if __name__ == "__main__":

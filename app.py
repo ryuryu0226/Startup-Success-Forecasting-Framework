@@ -1,7 +1,6 @@
 import streamlit as st
 import sys
 import os
-import time
 import traceback
 
 # Add the project root directory to the Python path
@@ -31,7 +30,7 @@ def main():
         else:
             st.warning("Please enter startup information before analyzing.")
 
-def analyze_startup_with_updates(framework, startup_info_str, placeholder):
+def analyze_startup_with_updates(framework: StartupFramework, startup_info_str, placeholder):
     with placeholder.container():
         st.write("### Analysis in Progress")
         progress_bar = st.progress(0)
@@ -76,12 +75,13 @@ def analyze_startup_with_updates(framework, startup_info_str, placeholder):
             result['Founder Idea Fit'] = founder_idea_fit[0]
 
             update_status("Integration", 0.8)
-            integrated_analysis = framework.integration_agent.integrate_analyses(
-                market_analysis.dict(),
-                product_analysis.dict(),
-                founder_analysis.dict(),
-                prediction,
-                mode="advanced"
+            integrated_analysis = framework.integration_agent.integrated_analysis_pro(
+                str(market_analysis.dict()),
+                str(product_analysis.dict()),
+                str(founder_analysis.dict()),
+                founder_idea_fit[0],
+                founder_segmentation,
+                prediction
             )
             st.write("Integration Complete")
             result['Final Decision'] = integrated_analysis.dict()
@@ -90,8 +90,7 @@ def analyze_startup_with_updates(framework, startup_info_str, placeholder):
             quant_decision = framework.integration_agent.getquantDecision(
                 prediction,
                 founder_idea_fit[0],
-                founder_segmentation,
-                integrated_analysis.dict()
+                founder_segmentation
             )
             st.write("Quantitative Decision Complete")
             result['Quantitative Decision'] = quant_decision.dict()
@@ -111,46 +110,42 @@ def display_final_results(result, mode):
     # Display Final Decision
     st.write("### Final Decision")
     final_decision = result['Final Decision']
-    st.write(f"Overall Score: {final_decision['overall_score']:.2f}")
-    st.write(f"Summary: {final_decision['summary']}")
-    st.write("Strengths:")
-    for strength in final_decision['strengths']:
-        st.write(f"- {strength}")
-    st.write("Weaknesses:")
-    for weakness in final_decision['weaknesses']:
-        st.write(f"- {weakness}")
-    st.write(f"Recommendation: {final_decision['recommendation']}")
+    st.write(f"**Overall Score:** {final_decision['overall_score']:.2f}/10")
+    st.write(f"**Outcome:** {final_decision['outcome']}")
+    st.write(f"**Recommendation:** {final_decision['recommendation']}")
+    st.write("**Integrated Analysis:**")
+    st.write(final_decision['IntegratedAnalysis'])
 
     # Display Market Info
     st.write("### Market Information")
     market_info = result['Market Info']
-    st.write(f"Market Size: {market_info['market_size']}")
-    st.write(f"Growth Rate: {market_info['growth_rate']}")
-    st.write(f"Competition: {market_info['competition']}")
-    st.write(f"Market Trends: {market_info['market_trends']}")
-    st.write(f"Viability Score: {market_info['viability_score']}")
+    st.write(f"**Market Size:** {market_info['market_size']}")
+    st.write(f"**Growth Rate:** {market_info['growth_rate']}")
+    st.write(f"**Competition:** {market_info['competition']}")
+    st.write(f"**Market Trends:** {market_info['market_trends']}")
+    st.write(f"**Viability Score:** {market_info['viability_score']}/10")
 
     # Display Product Info
     st.write("### Product Information")
     product_info = result['Product Info']
-    st.write(f"Features Analysis: {product_info['features_analysis']}")
-    st.write(f"Tech Stack Evaluation: {product_info['tech_stack_evaluation']}")
-    st.write(f"USP Assessment: {product_info['usp_assessment']}")
-    st.write(f"Potential Score: {product_info['potential_score']}")
-    st.write(f"Innovation Score: {product_info['innovation_score']}")
-    st.write(f"Market Fit Score: {product_info['market_fit_score']}")
+    st.write(f"**Features Analysis:** {product_info['features_analysis']}")
+    st.write(f"**Tech Stack Evaluation:** {product_info['tech_stack_evaluation']}")
+    st.write(f"**USP Assessment:** {product_info['usp_assessment']}")
+    st.write(f"**Potential Score:** {product_info['potential_score']}/10")
+    st.write(f"**Innovation Score:** {product_info['innovation_score']}/10")
+    st.write(f"**Market Fit Score:** {product_info['market_fit_score']}/10")
 
     # Display Founder Info
     st.write("### Founder Information")
     founder_info = result['Founder Info']
-    st.write(f"Competency Score: {founder_info['competency_score']}")
-    st.write(f"Strengths: {founder_info['strengths']}")
-    st.write(f"Challenges: {founder_info['challenges']}")
+    st.write(f"**Competency Score:** {founder_info['competency_score']}/10")
+    st.write("**Analysis:**")
+    st.write(founder_info['analysis'])
 
     # Display Prediction and Categorization
     st.write("### Prediction and Categorization")
-    st.write(f"Prediction: {result['Categorical Prediction']}")
-    st.write("Categorization:")
+    st.write(f"**Prediction:** {result['Categorical Prediction']}")
+    st.write("**Categorization:**")
     for key, value in result['Categorization'].items():
         st.write(f"- {key}: {value}")
 
@@ -158,16 +153,16 @@ def display_final_results(result, mode):
     if mode.lower() == "advanced":
         st.write("### Advanced Analysis")
         if 'Founder Segmentation' in result:
-            st.write(f"Founder Segmentation: {result['Founder Segmentation']}")
+            st.write(f"**Founder Segmentation:** L{result['Founder Segmentation']}")
         if 'Founder Idea Fit' in result:
-            st.write(f"Founder Idea Fit: {result['Founder Idea Fit']:.4f}")
+            st.write(f"**Founder Idea Fit:** {result['Founder Idea Fit']:.4f}")
         
         if 'Quantitative Decision' in result:
             st.write("### Quantitative Decision")
             quant_decision = result['Quantitative Decision']
-            st.write(f"Outcome: {quant_decision['outcome']}")
-            st.write(f"Probability: {quant_decision['probability']:.4f}")
-            st.write(f"Reasoning: {quant_decision['reasoning']}")
+            st.write(f"**Outcome:** {quant_decision['outcome']}")
+            st.write(f"**Probability:** {quant_decision['probability']:.2%}")
+            st.write(f"**Reasoning:** {quant_decision['reasoning']}")
 
 if __name__ == "__main__":
     main()

@@ -31,13 +31,17 @@ class BaseAgent:
         return self.secrets.get(key, default)
 
     def get_response(self, system_content, user_content):
-        self.logger.debug(f"BaseAgent getting response. System: '{system_content[:50]}...', User: '{user_content[:50]}...'")
+        system_preview = system_content[:50] + "..." if system_content else "None"
+        user_preview = user_content[:50] + "..." if user_content else "None"
+        self.logger.debug(f"BaseAgent getting response. System: '{system_preview}', User: '{user_preview}'")
         response = self.openai_api.get_completion(system_content, user_content)
         self.logger.debug(f"BaseAgent received response: '{str(response)[:100]}...'")
         return response
 
     def get_json_response(self, base_model, system_content, user_content):
-        self.logger.debug(f"BaseAgent getting JSON response. Schema: {base_model.__name__}, System: '{system_content[:50]}...', User: '{user_content[:50]}...'")
+        system_preview = system_content[:50] + "..." if system_content else "None"
+        user_preview = user_content[:50] + "..." if user_content else "None"
+        self.logger.debug(f"BaseAgent getting JSON response. Schema: {base_model.__name__}, System: '{system_preview}', User: '{user_preview}'")
         json_response = self.openai_api.get_structured_output(base_model, system_content, user_content)
         self.logger.debug(f"BaseAgent received JSON response: {json_response}")
         return json_response

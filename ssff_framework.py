@@ -1,6 +1,5 @@
 import logging
 from typing import Dict, Any
-from pydantic import BaseModel
 
 from agents.market_agent import MarketAgent
 from agents.product_agent import ProductAgent
