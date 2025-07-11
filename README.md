@@ -10,21 +10,15 @@ Startup Success Forecasting Framework (SSFF) は、スタートアップの成�
 project_root/
 │
 ├── agents/                  # Core agent logic (founder, market, product, etc.)
-├── algorithms/              # ML algorithms, embeddings, similarity calculations
 ├── models/                  # Trained model artifacts (e.g., .keras, .joblib)
-├── plots/                   # Generated plots and visualizations
 ├── utils/                   # Utility scripts, configuration, API wrappers
 │
 ├── app.py                   # Main Streamlit application for web interface
-├── main.py                  # Alternative main execution script (if applicable)
-├── overallPipeline.py       # Core pipeline orchestration script
-├── baseline_framework.py    # Scripts for baseline model implementations
 ├── ssff_framework.py        # Core SSFF framework logic
 │
 ├── requirements.txt         # Project dependencies
 ├── .env                     # Environment variables
-├── README.md                # This file
-└── SETUP_GUIDE.md           # Detailed setup instructions
+└── README.md                # This file
 ```
 
 ## 環境設定
@@ -81,12 +75,6 @@ project_root/
 
 ```bash
 streamlit run app.py
-```
-
-代替として、メインパイプラインスクリプトを使用できます（直接スクリプト実行の詳細は `main.py` または `overallPipeline.py` を参照）：
-
-```bash
-python overallPipeline.py # 例、正しいスクリプトと引数を確認してください
 ```
 
 ### このフレームワークは 2 つの動作モードをサポートしています：

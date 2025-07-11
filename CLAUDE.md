@@ -38,12 +38,6 @@ pylint $(git ls-files '*.py')
 - **VCScoutAgent** (`agents/vc_scout_agent.py`): VC 視点での総合評価を提供
 - **IntegrationAgent** (`agents/integration_agent.py`): 全エージェントの分析を統合し最終評価を生成
 
-### 機械学習パイプライン
-
-- **ニューラルネットワーク** (`algorithms/neuralNetworks.py`): 深層学習による成功予測
-- **ランダムフォレスト** (`algorithms/randomForest.py`): アンサンブル学習による予測
-- **LLM セグメンテーション** (`algorithms/LLM_Segmentation.py`): GPT を使用した創業者の 5 段階分類
-
 ### データフロー
 
 1. 創業者情報入力 → FounderAgent でセグメンテーション（L1-L5）
@@ -74,11 +68,6 @@ project_root/
 │   ├── market_agent.py
 │   ├── product_agent.py
 │   └── vc_scout_agent.py
-├── algorithms/              # 機械学習アルゴリズム
-│   ├── LLM_Segmentation.py
-│   ├── neuralNetworks.py
-│   ├── randomForest.py
-│   └── SerpAPI_Testing.py
 ├── models/                  # 訓練済みモデル
 │   ├── neural_network.keras
 │   ├── random_forest_classifier.joblib
@@ -102,7 +91,6 @@ project_root/
 │   └── vc_scout_prompt.py
 ├── app.py                   # StreamlitのWebUI
 ├── ssff_framework.py        # メインフレームワーク
-├── overallPipeline.py       # パイプライン実行スクリプト
 └── requirements.txt         # 依存パッケージ
 ```
 
