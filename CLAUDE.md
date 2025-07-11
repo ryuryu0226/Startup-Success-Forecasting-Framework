@@ -85,14 +85,21 @@ project_root/
 │   └── trained_encoder_RF.joblib
 ├── schemas/                 # Pydanticスキーマ定義
 │   ├── __init__.py
-│   ├── founder_schemas.py
-│   ├── integration_schemas.py
-│   ├── market_schemas.py
-│   ├── product_schemas.py
-│   └── vc_scout_schemas.py
+│   ├── founder_schema.py
+│   ├── integration_schema.py
+│   ├── market_schema.py
+│   ├── product_schema.py
+│   └── vc_scout_schema.py
 ├── utils/                   # ユーティリティスクリプト
-│   ├── api_wrapper.py
+│   ├── openai_api.py
+│   ├── google_search_api.py
 │   └── config.py
+├── prompts/                 # プロンプト定義ファイル
+│   ├── founder_prompt.py
+│   ├── integration_prompt.py
+│   ├── market_prompt.py
+│   ├── product_prompt.py
+│   └── vc_scout_prompt.py
 ├── app.py                   # StreamlitのWebUI
 ├── ssff_framework.py        # メインフレームワーク
 ├── overallPipeline.py       # パイプライン実行スクリプト
@@ -119,41 +126,3 @@ project_root/
 
 - エージェント分析は並列実行可能
 - 結果はキャッシュ可能（Streamlit の`@st.cache_data`使用）
-
-## 重要なファイル
-
-### コア実行ファイル
-
-- `app.py`: Streamlit WebUI のメインファイル
-- `ssff_framework.py`: フレームワークの中核実装
-- `overallPipeline.py`: パイプライン統合実行
-- `baseline_framework.py`: ベースラインモデル実装
-
-### エージェント実装
-
-- `agents/base_agent.py`: 全エージェントの基底クラス
-- `agents/founder_agent.py`: 創業者分析エージェント
-- `agents/market_agent.py`: 市場分析エージェント
-- `agents/product_agent.py`: プロダクト分析エージェント
-- `agents/vc_scout_agent.py`: VC 評価エージェント
-- `agents/integration_agent.py`: 統合分析エージェント
-
-### 機械学習モデル
-
-- `algorithms/neuralNetworks.py`: ニューラルネットワーク実装
-- `algorithms/randomForest.py`: ランダムフォレスト実装
-- `algorithms/LLM_Segmentation.py`: LLM ベースのセグメンテーション
-
-### 訓練済みモデル
-
-- `models/neural_network.keras`: 訓練済みニューラルネットワーク
-- `models/random_forest_classifier.joblib`: 訓練済みランダムフォレスト
-- `models/trained_encoder_RF.joblib`: 特徴量エンコーダー
-
-### Pydanticスキーマ定義
-
-- `schemas/founder_schemas.py`: 創業者分析関連スキーマ（FounderAnalysis、AdvancedFounderAnalysis、FounderSegmentation）
-- `schemas/integration_schemas.py`: 統合分析関連スキーマ（IntegratedAnalysis、QuantitativeDecision）
-- `schemas/market_schemas.py`: 市場分析関連スキーマ（MarketAnalysis）
-- `schemas/product_schemas.py`: プロダクト分析関連スキーマ（ProductAnalysis）
-- `schemas/vc_scout_schemas.py`: VC評価関連スキーマ（StartupInfo、StartupCategorization、StartupEvaluation）
