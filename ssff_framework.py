@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class StartupFramework:
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         self.model = model
         self.market_agent = MarketAgent(model)
         self.product_agent = ProductAgent(model)
