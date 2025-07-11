@@ -7,7 +7,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from agents.base_agent import BaseAgent
-from utils.api_wrapper import GoogleSearchAPI
+from utils.google_search_api import GoogleSearchAPI
 from schemas.market_schema import MarketAnalysis
 from prompts.market_prompt import (
     ANALYSIS_PROMPT,

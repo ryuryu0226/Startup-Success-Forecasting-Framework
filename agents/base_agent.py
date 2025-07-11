@@ -6,7 +6,7 @@ import logging
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
-from utils.api_wrapper import OpenAIAPI
+from utils.openai_api import OpenAIAPI
 
 # Configure basic logging if not already configured by the main script
 # This is a failsafe; ideally, the main script configures logging.
