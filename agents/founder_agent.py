@@ -10,6 +10,7 @@ sys.path.insert(0, project_root)
 
 from agents.base_agent import BaseAgent
 from schemas.founder_schema import FounderAnalysis, AdvancedFounderAnalysis, FounderSegmentation
+from prompts.founder_prompt import ANALYSIS_PROMPT, SEGMENTATION_PROMPT
 
 class FounderAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
@@ -25,7 +26,7 @@ class FounderAgent(BaseAgent):
         founder_info = self._get_founder_info(startup_info)
         
         if mode == "advanced":
-            basic_analysis = self.get_json_response(FounderAnalysis, self._get_analysis_prompt(), founder_info)
+            basic_analysis = self.get_json_response(FounderAnalysis, ANALYSIS_PROMPT, founder_info)
             segmentation = self.segment_founder(founder_info)
             idea_fit, cosine_similarity = self.calculate_idea_fit(startup_info, founder_info)
             
@@ -36,7 +37,7 @@ class FounderAgent(BaseAgent):
                 idea_fit=idea_fit,
             )
         else:
-            return self.get_json_response(FounderAnalysis, self._get_analysis_prompt(), founder_info)
+            return self.get_json_response(FounderAnalysis, ANALYSIS_PROMPT, founder_info)
 
     def _get_founder_info(self, startup_info):
         return f"Founders' Backgrounds: {startup_info.get('founder_backgrounds', '')}\n" \
@@ -45,7 +46,7 @@ class FounderAgent(BaseAgent):
                f"Vision and Alignment: {startup_info.get('vision_alignment', '')}"
 
     def segment_founder(self, founder_info):
-        return self.get_json_response(FounderSegmentation, self._get_segmentation_prompt(), founder_info).segmentation
+        return self.get_json_response(FounderSegmentation, SEGMENTATION_PROMPT, founder_info).segmentation
 
     def calculate_idea_fit(self, startup_info, founder_info):
         founder_embedding = self.openai_api.get_embeddings(founder_info)
@@ -71,24 +72,6 @@ class FounderAgent(BaseAgent):
         vec2 = np.array(vec2).reshape(1, -1)
         return cosine_similarity(vec1, vec2)[0][0]
 
-    def _get_analysis_prompt(self):
-        return """
-        As a highly qualified analyst specializing in startup founder assessment, evaluate the founding team based on the provided information.
-        Consider the founders' educational background, industry experience, leadership capabilities, and their ability to align and execute on the company's vision.
-        Provide a competency score, key strengths, and potential challenges. Please write in great details.
-        """
-
-    def _get_segmentation_prompt(self):
-        return """
-        Categorize the founder into one of these levels: L1, L2, L3, L4, L5.
-        L5: Entrepreneur who has built a $100M+ ARR business or had a major exit.
-        L4: Entrepreneur with a small to medium-size exit or executive at a notable tech company.
-        L3: 10-15 years of technical and management experience.
-        L2: Entrepreneurs with a few years of experience or accelerator graduates.
-        L1: Entrepreneurs with negligible experience but large potential.
-
-        Based on the founder information provided, determine the appropriate level.
-        """
 
 if __name__ == "__main__":
     def test_founder_agent():

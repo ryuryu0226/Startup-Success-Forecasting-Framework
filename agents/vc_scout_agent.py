@@ -11,6 +11,12 @@ sys.path.insert(0, project_root)
 
 from agents.base_agent import BaseAgent
 from schemas.vc_scout_schema import StartupInfo, StartupCategorization, StartupEvaluation
+from prompts.vc_scout_prompt import (
+    PARSE_RECORD_PROMPT,
+    BASIC_EVALUATION_PROMPT,
+    ADVANCED_EVALUATION_PROMPT,
+    CATEGORIZATION_PROMPT
+)
 
 class VCScoutAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
@@ -31,15 +37,7 @@ class VCScoutAgent(BaseAgent):
         Convert a string description of a startup into a StartupInfo schema.
         """
         self.logger.info("Parsing startup information into StartupInfo schema")
-        prompt = """
-        Convert the following startup description into a detailed JSON structure that matches the StartupInfo schema. 
-        Include as many fields as possible based on the information provided in the description.
-        If information for a field is not available, omit that field from the JSON.
-        Pay special attention to product details, technology stack, and any information about the product's unique features or market fit.
- 
-        Startup description:
-        {startup_info}
-        """  
+        prompt = PARSE_RECORD_PROMPT  
         try:
             startup_info_dict = self.get_json_response(StartupInfo, prompt, startup_info)
             self.logger.debug(f"Parsed startup info: {startup_info_dict}")
@@ -54,10 +52,10 @@ class VCScoutAgent(BaseAgent):
         self.logger.debug(f"Startup info: {startup_info_str}")
         
         if mode == "basic":
-            analysis = self.get_json_response(StartupEvaluation, self._get_basic_evaluation_prompt(), startup_info_str)
+            analysis = self.get_json_response(StartupEvaluation, BASIC_EVALUATION_PROMPT, startup_info_str)
             self.logger.info("Basic evaluation completed")
         else:  # advanced mode
-            analysis = self.get_json_response(StartupEvaluation, self._get_advanced_evaluation_prompt(), startup_info_str)
+            analysis = self.get_json_response(StartupEvaluation, ADVANCED_EVALUATION_PROMPT, startup_info_str)
             self.logger.info("Advanced evaluation completed")
         
         return analysis
@@ -65,7 +63,7 @@ class VCScoutAgent(BaseAgent):
     def side_evaluate(self, startup_info: StartupInfo) -> Tuple[str, StartupCategorization]:
         self.logger.info("Starting side evaluation")
         startup_info_str = startup_info.json()
-        categorization = self.get_json_response(StartupCategorization, self._get_categorization_prompt(), startup_info_str)
+        categorization = self.get_json_response(StartupCategorization, CATEGORIZATION_PROMPT, startup_info_str)
         self.logger.info("Categorization completed")
 
         # Validate the categorization
@@ -104,53 +102,6 @@ class VCScoutAgent(BaseAgent):
 
         return "Successful" if prediction[0] == 1 else "Unsuccessful"
 
-    def _get_basic_evaluation_prompt(self):
-        return """
-        As an experienced VC scout, evaluate the startup based on the following information:
-        {startup_info}
-
-        Provide a comprehensive analysis including market opportunity, product innovation, founding team, and potential risks.
-        Conclude with an overall potential score from 1 to 10.
-        """
-
-    def _get_advanced_evaluation_prompt(self):
-        return """
-        As an experienced VC scout, provide an in-depth evaluation of the startup based on the following information:
-        {startup_info}
-
-        Provide a comprehensive analysis including market opportunity, product innovation, founding team, and potential risks.
-        Conclude with an overall potential score from 1 to 10, an investment recommendation (Invest or Pass), 
-        a confidence level in your recommendation (0 to 1), and a brief rationale for your decision.
-        """
-
-    def _get_categorization_prompt(self):
-        return """
-        As an analyst specializing in startup evaluation, categorize the given startup based on the following criteria.
-        Provide a categorical response for each of the following questions based on the startup information provided.
-        Use ONLY the specified categorical responses for each field. Do not use any other responses.
-
-        1. Industry Growth: [Yes/No/N/A]
-        2. Market Size: [Small/Medium/Large/N/A]
-        3. Development Pace: [Slower/Same/Faster/N/A]
-        4. Market Adaptability: [Not Adaptable/Somewhat Adaptable/Very Adaptable/N/A]
-        5. Execution Capabilities: [Poor/Average/Excellent/N/A]
-        6. Funding Amount: [Below Average/Average/Above Average/N/A]
-        7. Valuation Change: [Decreased/Remained Stable/Increased/N/A]
-        8. Investor Backing: [Unknown/Recognized/Highly Regarded/N/A]
-        9. Reviews and Testimonials: [Negative/Mixed/Positive/N/A]
-        10. Product-Market Fit: [Weak/Moderate/Strong/N/A]
-        11. Sentiment Analysis: [Negative/Neutral/Positive/N/A]
-        12. Innovation Mentions: [Rarely/Sometimes/Often/N/A]
-        13. Cutting-Edge Technology: [No/Mentioned/Emphasized/N/A]
-        14. Timing: [Too Early/Just Right/Too Late/N/A]
-
-        Provide your analysis in a JSON format that matches the StartupCategorization schema.
-        If you cannot determine a category based on the given information, use 'N/A'.
-        Do not include any explanations or additional text outside of the JSON structure.
-
-        Startup Information:
-        {startup_info}
-        """
 
 if __name__ == "__main__":
     def test_vc_scout_agent():

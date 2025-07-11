@@ -9,6 +9,12 @@ sys.path.insert(0, project_root)
 from agents.base_agent import BaseAgent
 from utils.api_wrapper import GoogleSearchAPI
 from schemas.product_schema import ProductAnalysis
+from prompts.product_prompt import (
+    ANALYSIS_PROMPT,
+    ADVANCED_ANALYSIS_PROMPT,
+    NATURAL_LANGUAGE_ANALYSIS_PROMPT,
+    KEYWORD_GENERATION_PROMPT,
+)
 
 class ProductAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
@@ -41,7 +47,7 @@ class ProductAgent(BaseAgent):
             product_report = self._get_external_knowledge(startup_info)
             self.logger.debug(f"Product report: {product_report}")
             
-            prompt = self.natural_language_analysis_prompt().format(
+            prompt = NATURAL_LANGUAGE_ANALYSIS_PROMPT.format(
                 startup_info=startup_info,
                 product_info=product_info,
                 keywords=keywords,
@@ -69,14 +75,14 @@ class ProductAgent(BaseAgent):
             
             analysis = self.get_json_response(
                 ProductAnalysis, 
-                self._get_advanced_analysis_prompt(), 
+                ADVANCED_ANALYSIS_PROMPT, 
                 f"{product_info}\n\nExternal Research:\n{external_knowledge}"
             )
             self.logger.info("Advanced analysis completed")
             return analysis
 
             
-        analysis = self.get_json_response(ProductAnalysis, self._get_analysis_prompt(), product_info)
+        analysis = self.get_json_response(ProductAnalysis, ANALYSIS_PROMPT, product_info)
         self.logger.info("Basic analysis completed")
         return analysis
     
@@ -205,7 +211,7 @@ class ProductAgent(BaseAgent):
         # Log keyword generation prompt
         self.external_knowledge_logger.info(f"\nKeyword Generation Prompt:\n{prompt}")
         
-        keywords = self.get_response(self._get_keyword_generation_prompt(), prompt)
+        keywords = self.get_response(KEYWORD_GENERATION_PROMPT, prompt)
         return keywords
 
     def _get_product_info(self, startup_info):
@@ -214,89 +220,6 @@ class ProductAgent(BaseAgent):
                f"Technology Stack: {startup_info.get('technology_stack', '')}\n" \
                f"Unique Selling Proposition: {startup_info.get('product_fit', '')}"
 
-    def _get_analysis_prompt(self):
-        return """
-        As a product expert, analyze the startup's product based on the following information:
-        {product_info}
-
-        Consider the product's features, technology stack, and unique selling proposition.
-        Provide a comprehensive analysis and rate the product's potential on a scale of 1 to 10.
-
-        Make sure that you think step by step and analyze in a professional manner.
-        """
-
-    def _get_advanced_analysis_prompt(self):
-        return """
-        As a product expert, provide an in-depth analysis of the startup's product based on the following information:
-        {product_info}
-
-        Include insights from external research about similar products, technical feasibility, and industry standards.
-        
-        Consider:
-        1. Technical innovation and feasibility
-        2. Feature completeness compared to competitors
-        3. Technology stack robustness
-        4. Unique selling proposition strength
-        5. Implementation challenges and solutions
-        
-        Provide scores for:
-        - Product potential (1-10)
-        - Innovation level (1-10)
-        - Market fit (1-10)
-        
-        Make sure to think step by step and analyze in a professional manner.
-        """
-
-    def _get_keyword_generation_prompt(self):
-        return """You are an AI assistant skilled at generating relevant search keywords 
-        for technical and product research. Please provide 3-5 concise keywords or short 
-        phrases based on the given information, focusing on technical aspects and industry standards."""
-
-    def _get_synthesis_prompt(self):
-        return """You are an AI assistant skilled at synthesizing technical information. 
-        Please provide a concise summary of the key points from the given search results, 
-        focusing on technical feasibility, similar products, and industry standards."""
-
-    def natural_language_analysis_prompt(self):
-        return """
-        You are a professional product analyst in a VC firm evaluating a potential investment opportunity. 
-        
-        Company Information:
-        {startup_info}
-
-        Product Information:
-        {product_info}
-
-        Product Research Report:
-        {external_knowledge}
-
-        Based on this comprehensive product research and initial data, please provide:
-        1. Technical Innovation Analysis
-           - How innovative is the technology?
-           - Is it feasible to implement?
-           - What are the technical risks?
-
-        2. Feature Set Evaluation
-           - How complete is the feature set?
-           - How does it compare to competitors?
-           - What are the key differentiators?
-
-        3. Implementation Assessment
-           - What are the main technical challenges?
-           - How realistic is the development timeline?
-           - What resources are needed?
-
-        4. Market Readiness
-           - Is the product ready for the target market?
-           - What further development is needed?
-           - How strong is the product-market fit?
-
-        Please reference specific data points from the product research report in your analysis.
-        Conclude with:
-        - Product potential score (1-10)
-        - Innovation score (1-10)
-        - Market fit score (1-10)
-        """
 
 if __name__ == "__main__":
     def test_product_agent():

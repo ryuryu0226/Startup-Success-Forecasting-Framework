@@ -9,6 +9,12 @@ sys.path.insert(0, project_root)
 from agents.base_agent import BaseAgent
 from utils.api_wrapper import GoogleSearchAPI
 from schemas.market_schema import MarketAnalysis
+from prompts.market_prompt import (
+    ANALYSIS_PROMPT,
+    ADVANCED_ANALYSIS_PROMPT,
+    NATURAL_LANGUAGE_ANALYSIS_PROMPT,
+    SYNTHESIS_PROMPT
+)
 
 class MarketAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
@@ -26,14 +32,14 @@ class MarketAgent(BaseAgent):
         market_info = self._get_market_info(startup_info)
         self.logger.debug(f"Market info: {market_info}")
         
-        analysis = self.get_json_response(MarketAnalysis, self._get_analysis_prompt(), market_info)
+        analysis = self.get_json_response(MarketAnalysis, ANALYSIS_PROMPT, market_info)
         self.logger.info("Basic analysis completed")
         
         if mode == "advanced":
             self.logger.info("Starting advanced analysis")
             external_knowledge = self._get_external_knowledge(startup_info)
             self.logger.debug(f"External knowledge: {external_knowledge}")
-            advanced_analysis = self.get_json_response(MarketAnalysis, self._get_advanced_analysis_prompt(), f"{market_info}\n\nAdditional Information:\n{external_knowledge}")
+            advanced_analysis = self.get_json_response(MarketAnalysis, ADVANCED_ANALYSIS_PROMPT, f"{market_info}\n\nAdditional Information:\n{external_knowledge}")
             self.logger.info("Advanced analysis completed")
             return advanced_analysis
         
@@ -61,7 +67,7 @@ class MarketAgent(BaseAgent):
             # Get external knowledge
             external_knowledge = self._get_external_knowledge(startup_info)
             
-            prompt = self.natural_language_analysis_prompt().format(
+            prompt = NATURAL_LANGUAGE_ANALYSIS_PROMPT.format(
                 startup_info=startup_info,
                 market_info=market_info,
                 keywords=keywords,
@@ -154,62 +160,8 @@ class MarketAgent(BaseAgent):
 
     def _synthesize_knowledge(self, search_results):
         synthesis_prompt = f"Synthesize the following search results into a concise market overview:\n\n{search_results}"
-        return self.get_response(self._get_synthesis_prompt(), synthesis_prompt)
+        return self.get_response(SYNTHESIS_PROMPT, synthesis_prompt)
 
-    def _get_analysis_prompt(self):
-        return """
-        As an experienced market analyst, analyze the startup's market based on the following information:
-        {market_info}
-
-        Provide a comprehensive analysis including market size, growth rate, competition, and key trends.
-        Conclude with a market viability score from 1 to 10.
-        """
-
-    def _get_advanced_analysis_prompt(self):
-        return """
-        As an experienced market analyst, provide an in-depth analysis of the startup's market based on the following information:
-        {market_info}
-
-        Include insights from the additional external research provided.
-        Provide a comprehensive analysis including market size, growth rate, competition, and key trends.
-        Conclude with a market viability score from 1 to 10, factoring in the external data.
-        """
-    
-    def natural_language_analysis_prompt(self):
-        return """
-        You are a professional agent in a VC firm to analyze a company. Your task is to analyze the company here. Context: {startup_info}
-
-        Your focus is on the market side. What is the market? Is the market big enough? Is now the good timing? Will there be a good product-market-fit? 
-        
-        Specifically here are some relevant market information: {market_info}. 
-
-        Your intern has researched more around the following topic for you as context {keywords}.
-
-        The research result: {external_knowledge}
-
-        Provide a comprehensive analysis including market size, growth rate, competition, and key trends. Analyze step by step to formulate your comprehensive analysis to answer the questions proposed above.
-
-        Also conclude with a market viability score from 1 to 10. 
-        """
-
-    def _get_keyword_generation_prompt(self):
-        return "You are an AI assistant skilled at generating relevant search keywords. Please provide 3-5 concise keywords or short phrases based on the given information."
-
-    def _get_synthesis_prompt(self):
-        return """
-    You are a market research analyst. Synthesize the search results focusing on quantitative data points:
-    
-    - Market size (in USD)
-    - Growth rates (CAGR)
-    - Market share percentages
-    - Transaction volumes
-    - Customer acquisition costs
-    - Revenue metrics
-    - Competitive landscape metrics
-    
-    Format data points clearly and cite their time periods. If exact numbers aren't available, 
-    provide ranges based on available data. Prioritize numerical data over qualitative descriptions.
-    """
 
 if __name__ == "__main__":
     def test_market_agent():
