@@ -1,5 +1,6 @@
 import os
 import logging
+from typing import Optional
 from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -27,26 +28,18 @@ class OpenAIAPI:
         self.logger = logging.getLogger(__name__)
         
         api_key = None
-        api_key_source = "Unknown"
 
         # 1. Try os.getenv() first (which load_dotenv() should populate if .env exists)
         api_key = os.getenv("OPENAI_API_KEY")
-        if api_key:
-            api_key_source = "os.getenv (potentially from .env)"
-        
         # 2. Fallback to Streamlit secrets if not found via os.getenv() AND if Streamlit is available
         if not api_key:
             try:
                 import streamlit as st
                 api_key = st.secrets.get("OPENAI_API_KEY")
-                if api_key:
-                    api_key_source = "Streamlit secrets"
             except ImportError:
                 self.logger.debug("Streamlit is not installed or not in a Streamlit environment, skipping Streamlit secrets.")
             except Exception as e:
                 self.logger.debug(f"Error trying to access Streamlit secrets: {e}")
-
-        self.logger.info(f"Attempting to use OpenAI API Key from {api_key_source}. Key: {'*' * (len(api_key) - 4) + api_key[-4:] if api_key else 'Not Found'}")
 
         if not api_key:
             self.logger.error("OPENAI_API_KEY not found through os.getenv, .env, or Streamlit secrets.")
@@ -54,7 +47,7 @@ class OpenAIAPI:
         
         self.client = OpenAI(api_key=api_key)
 
-    def get_completion(self, system_content, user_content):
+    def get_completion(self, system_content: str, user_content: str) -> Optional[str]:
         """
         Get a completion from the OpenAI API.
         """
@@ -74,7 +67,12 @@ class OpenAIAPI:
             self.logger.error(f"An error occurred during get_completion: {e}", exc_info=True)
             return None
 
-    def get_structured_output(self, schema_class: BaseModel, user_prompt, system_prompt):
+    def get_structured_output(
+        self,
+        schema_class: BaseModel,
+        user_prompt: str,
+        system_prompt: str,
+    ) -> Optional[BaseModel]:
         """
         Structure the output according to the provided schema, user prompt, and system prompt.
         """
@@ -108,12 +106,11 @@ class OpenAIAPI:
             else:
                 self.logger.error("Completion object is None, has no choices, or choices list is empty.")
                 return None
-
         except Exception as e:
             self.logger.error(f"An error occurred during get_structured_output: {e}", exc_info=True)
             return None
 
-    def get_embeddings(self, text):
+    def get_embeddings(self, text: str) -> Optional[list[float]]:
         """
         Get embeddings for the given text.
         """
