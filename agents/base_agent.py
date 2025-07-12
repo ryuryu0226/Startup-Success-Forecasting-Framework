@@ -3,7 +3,6 @@ import sys
 import logging
 from typing import Optional, TypeVar, Type
 from pydantic import BaseModel
-from utils.openai_api import OpenAIAPI
 
 # Generic type for Pydantic models
 T = TypeVar('T', bound=BaseModel)
@@ -11,6 +10,8 @@ T = TypeVar('T', bound=BaseModel)
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
+
+from utils.openai_api import OpenAIAPI
 
 # Configure basic logging if not already configured by the main script
 # This is a failsafe; ideally, the main script configures logging.
