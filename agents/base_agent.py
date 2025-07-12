@@ -1,12 +1,16 @@
 import os
 import sys
 import logging
+from typing import Optional, TypeVar, Type
+from pydantic import BaseModel
+from utils.openai_api import OpenAIAPI
+
+# Generic type for Pydantic models
+T = TypeVar('T', bound=BaseModel)
 
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
-
-from utils.openai_api import OpenAIAPI
 
 # Configure basic logging if not already configured by the main script
 # This is a failsafe; ideally, the main script configures logging.
@@ -24,25 +28,31 @@ class BaseAgent:
         except Exception as e:
             self.logger.error(f"Failed to initialize OpenAIAPI: {e}", exc_info=True)
             raise
-        self.secrets = os.environ
-    
-    def _get_secret(self, key, default=None):
-        self.logger.debug(f"Accessing secret key: {key}")
-        return self.secrets.get(key, default)
 
-    def get_response(self, system_content, user_content):
+    def get_response(self, system_content: str, user_content: str) -> Optional[str]:
         system_preview = system_content[:50] + "..." if system_content else "None"
         user_preview = user_content[:50] + "..." if user_content else "None"
         self.logger.debug(f"BaseAgent getting response. System: '{system_preview}', User: '{user_preview}'")
         response = self.openai_api.get_completion(system_content, user_content)
+        if response is None:
+            self.logger.error("No response received from OpenAI API.")
+            return None
         self.logger.debug(f"BaseAgent received response: '{str(response)[:100]}...'")
         return response
 
-    def get_json_response(self, base_model, system_content, user_content):
+    def get_json_response(
+        self,
+        base_model: Type[T],
+        system_content: str,
+        user_content: str,
+    ) -> Optional[Type[T]]:
         system_preview = system_content[:50] + "..." if system_content else "None"
         user_preview = user_content[:50] + "..." if user_content else "None"
         self.logger.debug(f"BaseAgent getting JSON response. Schema: {base_model.__name__}, System: '{system_preview}', User: '{user_preview}'")
         json_response = self.openai_api.get_structured_output(base_model, system_content, user_content)
+        if json_response is None:
+            self.logger.error("No JSON response received from OpenAI API.")
+            return None
         self.logger.debug(f"BaseAgent received JSON response: {json_response}")
         return json_response
 

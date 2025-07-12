@@ -1,9 +1,12 @@
 import os
 import logging
-from typing import Optional
+from typing import Optional, TypeVar, Type
 from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
+
+# Generic type for Pydantic models
+T = TypeVar('T', bound=BaseModel)
 
 # Configure basic logging if not already configured by the main script
 # This is a failsafe; ideally, the main script configures logging.
@@ -69,12 +72,20 @@ class OpenAIAPI:
 
     def get_structured_output(
         self,
-        schema_class: BaseModel,
+        schema_class: Type[T],
         user_prompt: str,
         system_prompt: str,
-    ) -> Optional[BaseModel]:
+    ) -> Optional[T]:
         """
         Structure the output according to the provided schema, user prompt, and system prompt.
+        
+        Args:
+            schema_class: Pydantic model class for structured output
+            user_prompt: User message content
+            system_prompt: System message content
+            
+        Returns:
+            Parsed structured output of the same type as schema_class, or None if error occurred
         """
         self.logger.debug(f"Requesting structured output. Model: {self.model_name}, Schema: {schema_class.__name__}, System: '{system_prompt[:50]}...', User: '{user_prompt[:50]}...'")
         try:
