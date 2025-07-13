@@ -3,7 +3,6 @@ import sys
 import logging
 import joblib
 import pandas as pd
-from typing import Tuple
 
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -19,7 +18,7 @@ from prompts.vc_scout_prompt import (
 )
 
 class VCScoutAgent(BaseAgent):
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         super().__init__(model)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
@@ -37,9 +36,11 @@ class VCScoutAgent(BaseAgent):
         Convert a string description of a startup into a StartupInfo schema.
         """
         self.logger.info("Parsing startup information into StartupInfo schema")
-        prompt = PARSE_RECORD_PROMPT  
         try:
-            startup_info_dict = self.get_json_response(StartupInfo, prompt, startup_info)
+            startup_info_dict = self.get_json_response(
+                StartupInfo,
+                PARSE_RECORD_PROMPT,
+                startup_info)
             self.logger.debug(f"Parsed startup info: {startup_info_dict}")
             return startup_info_dict  # Return the dictionary directly
         except Exception as e:
@@ -60,46 +61,19 @@ class VCScoutAgent(BaseAgent):
         
         return analysis
 
-    def side_evaluate(self, startup_info: StartupInfo) -> Tuple[str, StartupCategorization]:
+    def side_evaluate(self, startup_info: StartupInfo) -> tuple[str, StartupCategorization]:
         self.logger.info("Starting side evaluation")
-        startup_info_str = startup_info.json()
+        startup_info_str = startup_info.model_dump_json()
         categorization = self.get_json_response(StartupCategorization, CATEGORIZATION_PROMPT, startup_info_str)
         self.logger.info("Categorization completed")
 
-        # Validate the categorization
-        # for field, value in categorization:
-        #     expected_values = StartupCategorization.__fields__[field].field_info.description.split('[')[1].split(']')[0].split('/')
-        #     if value not in expected_values:
-        #         self.logger.warning(f"Unexpected value '{value}' for field '{field}'. Expected one of {expected_values}. Setting to 'N/A'.")
-        #         setattr(categorization, field, 'N/A')
-
         prediction = self._predict(categorization)
         self.logger.info(f"Prediction: {prediction}")
-
         return prediction, categorization
 
     def _predict(self, categorization: StartupCategorization) -> str:
-        category_mappings = {
-            "industry_growth": ["No", "N/A", "Yes"],
-            "market_size": ["Small", "Medium", "Large", "N/A"],
-            "development_pace": ["Slower", "Same", "Faster", "N/A"],
-            "market_adaptability": ["Not Adaptable", "Somewhat Adaptable", "Very Adaptable", "N/A"],
-            "execution_capabilities": ["Poor", "Average", "Excellent", "N/A"],
-            "funding_amount": ["Below Average", "Average", "Above Average", "N/A"],
-            "valuation_change": ["Decreased", "Remained Stable", "Increased", "N/A"],
-            "investor_backing": ["Unknown", "Recognized", "Highly Regarded", "N/A"],
-            "reviews_testimonials": ["Negative", "Mixed", "Positive", "N/A"],
-            "product_market_fit": ["Weak", "Moderate", "Strong", "N/A"],
-            "sentiment_analysis": ["Negative", "Neutral", "Positive", "N/A"],
-            "innovation_mentions": ["Rarely", "Sometimes", "Often", "N/A"],
-            "cutting_edge_technology": ["No", "Mentioned", "Emphasized", "N/A"],
-            "timing": ["Too Early", "Just Right", "Too Late", "N/A"]
-        }
-
-        feature_order = list(category_mappings.keys())
-        encoded_features = self.encoder.transform(pd.DataFrame([categorization.dict()]))
+        encoded_features = self.encoder.transform(pd.DataFrame([categorization.model_dump()]))
         prediction = self.model_random_forest.predict(encoded_features)
-
         return "Successful" if prediction[0] == 1 else "Unsuccessful"
 
 
