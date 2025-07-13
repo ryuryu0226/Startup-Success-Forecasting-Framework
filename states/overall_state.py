@@ -1,7 +1,18 @@
-from typing import TypedDict, Any, Optional
-from typing_extensions import Annotated
+from typing import Any, Optional
+from typing_extensions import Annotated, TypedDict
 import operator
-from shared.types import Progress, StartupInfo
+from shared.types import (
+    ProgressDict,
+    StartupInfo,
+    MarketAnalysisDict,
+    ProductAnalysisDict,
+    FounderAnalysisDict,
+    AdvancedFounderAnalysisDict,
+    VCScoutAnalysisDict,
+    IntegratedAnalysisDict,
+    QuantitativeDecisionDict,
+    StartupCategorizationDict,
+)
 
 
 class OverallState(TypedDict):
@@ -16,25 +27,22 @@ class OverallState(TypedDict):
     startup_info: StartupInfo
     
     # Individual analyses
-    market_analysis: Optional[dict[str, Any]]
-    product_analysis: Optional[dict[str, Any]]
-    founder_analysis: Optional[dict[str, Any]]
-    
-    # Founder specific metrics
-    founder_segmentation: Optional[str]
-    founder_idea_fit: Optional[float]
+    market_analysis: Optional[MarketAnalysisDict]
+    product_analysis: Optional[ProductAnalysisDict]
+    founder_analysis: Optional[FounderAnalysisDict | AdvancedFounderAnalysisDict]
     
     # VC Scout results
     vc_prediction: Optional[str]
-    categorization: Optional[dict[str, Any]]
+    categorization: Optional[StartupCategorizationDict]
+    vc_scout_analysis: Optional[VCScoutAnalysisDict]
     
     # Integrated analyses
-    integrated_analysis: Optional[dict[str, Any]]
-    integrated_analysis_basic: Optional[dict[str, Any]]
-    quantitative_decision: Optional[dict[str, Any]]
+    integrated_analysis: Optional[IntegratedAnalysisDict]
+    integrated_analysis_basic: Optional[IntegratedAnalysisDict]
+    quantitative_decision: Optional[QuantitativeDecisionDict]
     
     # Progress tracking
-    progress: Progress
+    progress: ProgressDict
     
     # Workflow control
     next_step: Optional[str]

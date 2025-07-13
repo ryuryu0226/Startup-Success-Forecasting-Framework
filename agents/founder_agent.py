@@ -28,7 +28,7 @@ class FounderAgent(BaseAgent):
         self,
         startup_info: StartupInfo, 
         mode: str,
-    ):
+    ) -> FounderAnalysis | AdvancedFounderAnalysis:
         founder_info = self._get_founder_info(startup_info)
         
         if mode == "advanced":
@@ -37,7 +37,7 @@ class FounderAgent(BaseAgent):
             idea_fit, cosine_similarity = self.calculate_idea_fit(startup_info, founder_info)
             
             return AdvancedFounderAnalysis(
-                **basic_analysis.dict(),
+                **basic_analysis.model_dump(),
                 segmentation=segmentation,
                 cosine_similarity=cosine_similarity,
                 idea_fit=idea_fit,
@@ -58,7 +58,7 @@ class FounderAgent(BaseAgent):
         self,
         startup_info: StartupInfo,
         founder_info: str
-    ):
+    ) -> tuple[float, float]:
         founder_embedding = self.openai_api.get_embeddings(founder_info)
         startup_embedding = self.openai_api.get_embeddings(startup_info['description'])
         cosine_sim = self._calculate_cosine_similarity(founder_embedding, startup_embedding)

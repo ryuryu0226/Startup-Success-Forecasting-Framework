@@ -11,7 +11,7 @@ from nodes import (
     IntegrationNode
 )
 from states.overall_state import OverallState
-from shared.types import Progress
+from shared.types import ProgressDict
 
 
 # Configure logging
@@ -75,7 +75,7 @@ class SSFFGraph:
             integrated_analysis=None,
             integrated_analysis_basic=None,
             quantitative_decision=None,
-            progress=Progress(
+            progress=ProgressDict(
                 current_step="",
                 completed_steps=[],
                 start_time=datetime.now(),
@@ -166,4 +166,3 @@ if __name__ == "__main__":
         print(f"Error testing graph: {e}")
         import traceback
         traceback.print_exc()
-
