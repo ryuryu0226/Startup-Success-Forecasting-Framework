@@ -15,6 +15,7 @@ from prompts.market_prompt import (
     NATURAL_LANGUAGE_ANALYSIS_PROMPT,
     SYNTHESIS_PROMPT
 )
+from shared.types import StartupInfo
 
 class MarketAgent(BaseAgent):
     def __init__(self, model="gpt-4o-mini"):
@@ -27,7 +28,11 @@ class MarketAgent(BaseAgent):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-    def analyze(self, startup_info, mode):
+    def analyze(
+        self,
+        startup_info: StartupInfo,
+        mode: str
+    ) -> MarketAnalysis:
         self.logger.info(f"Starting market analysis in {mode} mode")
         market_info = self._get_market_info(startup_info)
         self.logger.debug(f"Market info: {market_info}")
@@ -83,13 +88,13 @@ class MarketAgent(BaseAgent):
         
         return analysis
 
-    def _get_market_info(self, startup_info):
+    def _get_market_info(self, startup_info: StartupInfo) -> str:
         return f"Market size: {startup_info.get('market_size', '')}\n" \
                f"Competition: {startup_info.get('competition', '')}\n" \
                f"Market Growth Rate: {startup_info.get('growth_rate', '')}\n" \
                f"Market Trends: {startup_info.get('market_trends', '')}"
 
-    def _get_external_knowledge(self, startup_info):
+    def _get_external_knowledge(self, startup_info: StartupInfo) -> str:
         """Get structured market report from external sources"""
         self.logger.info("Starting external knowledge gathering")
         
@@ -150,7 +155,7 @@ class MarketAgent(BaseAgent):
         
         return market_report
 
-    def _generate_keywords(self, startup_info):
+    def _generate_keywords(self, startup_info: StartupInfo) -> str:
         """Generate focused market keywords for research"""
         keyword_prompt = ("You will assist me in finding external market knowledge about a startup. Think step by step. "
                          "Your task is to summarise the information into 1 keyword that best describes the market that the startup is in. "

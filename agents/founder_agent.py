@@ -8,12 +8,14 @@ from tensorflow.keras.models import load_model
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
+from shared.types import StartupInfo
+
 from agents.base_agent import BaseAgent
 from schemas.founder_schema import FounderAnalysis, AdvancedFounderAnalysis, FounderSegmentation
 from prompts.founder_prompt import ANALYSIS_PROMPT, SEGMENTATION_PROMPT
 
 class FounderAgent(BaseAgent):
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         super().__init__(model)
         try:
             self.neural_network = load_model(os.path.join(project_root, 'models', 'neural_network.keras'))
@@ -22,7 +24,11 @@ class FounderAgent(BaseAgent):
             print("The founder agent will continue without neural network support.")
             self.neural_network = None
 
-    def analyze(self, startup_info, mode):
+    def analyze(
+        self,
+        startup_info: StartupInfo, 
+        mode: str,
+    ):
         founder_info = self._get_founder_info(startup_info)
         
         if mode == "advanced":
@@ -39,16 +45,20 @@ class FounderAgent(BaseAgent):
         else:
             return self.get_json_response(FounderAnalysis, ANALYSIS_PROMPT, founder_info)
 
-    def _get_founder_info(self, startup_info):
+    def _get_founder_info(self, startup_info: StartupInfo) -> str:
         return f"Founders' Backgrounds: {startup_info.get('founder_backgrounds', '')}\n" \
                f"Track Records: {startup_info.get('track_records', '')}\n" \
                f"Leadership Skills: {startup_info.get('leadership_skills', '')}\n" \
                f"Vision and Alignment: {startup_info.get('vision_alignment', '')}"
 
-    def segment_founder(self, founder_info):
+    def segment_founder(self, founder_info: str) -> FounderSegmentation:
         return self.get_json_response(FounderSegmentation, SEGMENTATION_PROMPT, founder_info).segmentation
 
-    def calculate_idea_fit(self, startup_info, founder_info):
+    def calculate_idea_fit(
+        self,
+        startup_info: StartupInfo,
+        founder_info: str
+    ):
         founder_embedding = self.openai_api.get_embeddings(founder_info)
         startup_embedding = self.openai_api.get_embeddings(startup_info['description'])
         cosine_sim = self._calculate_cosine_similarity(founder_embedding, startup_embedding)
@@ -67,7 +77,7 @@ class FounderAgent(BaseAgent):
             idea_fit = cosine_sim
         return float(idea_fit), cosine_sim
 
-    def _calculate_cosine_similarity(self, vec1, vec2):
+    def _calculate_cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         vec1 = np.array(vec1).reshape(1, -1)
         vec2 = np.array(vec2).reshape(1, -1)
         return cosine_similarity(vec1, vec2)[0][0]

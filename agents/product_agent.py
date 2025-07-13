@@ -15,9 +15,10 @@ from prompts.product_prompt import (
     NATURAL_LANGUAGE_ANALYSIS_PROMPT,
     KEYWORD_GENERATION_PROMPT,
 )
+from shared.types import StartupInfo
 
 class ProductAgent(BaseAgent):
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         super().__init__(model)
         self.search_api = GoogleSearchAPI()
         self.logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class ProductAgent(BaseAgent):
         self.external_knowledge_logger.addHandler(console_handler)
         self.external_knowledge_logger.setLevel(logging.INFO)
 
-    def analyze(self, startup_info, mode):
+    def analyze(self, startup_info: StartupInfo, mode: str) -> ProductAnalysis:
         self.logger.info(f"Starting product analysis in {mode} mode")
         product_info = self._get_product_info(startup_info)
         
@@ -87,7 +88,7 @@ class ProductAgent(BaseAgent):
         return analysis
     
 
-    def _get_external_knowledge(self, startup_info):
+    def _get_external_knowledge(self, startup_info: StartupInfo) -> str:
         """Get structured product research from external sources"""
         self.logger.info("Starting external knowledge gathering")
         
@@ -181,7 +182,7 @@ class ProductAgent(BaseAgent):
         
         return product_report
 
-    def _generate_keywords(self, startup_info):
+    def _generate_keywords(self, startup_info: StartupInfo) -> str:
         company_name = startup_info.get('name', '')
         prompt = f"""Generate 3-5 specific search keywords about {company_name}, starting with the company name itself.
         
@@ -214,7 +215,7 @@ class ProductAgent(BaseAgent):
         keywords = self.get_response(KEYWORD_GENERATION_PROMPT, prompt)
         return keywords
 
-    def _get_product_info(self, startup_info):
+    def _get_product_info(self, startup_info: StartupInfo) -> str:
         return f"Product Description: {startup_info.get('product_details', '')}\n" \
                f"Key Features: {startup_info.get('product_details', '')}\n" \
                f"Technology Stack: {startup_info.get('technology_stack', '')}\n" \

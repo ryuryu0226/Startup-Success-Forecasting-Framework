@@ -11,7 +11,7 @@ from schemas.integration_schema import IntegratedAnalysis, QuantitativeDecision
 from prompts.integration_prompt import BASIC_INTEGRATION_PROMPT, PRO_INTEGRATION_PROMPT, QUANT_DECISION_PROMPT
 
 class IntegrationAgent(BaseAgent):
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         super().__init__(model)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
@@ -20,7 +20,12 @@ class IntegrationAgent(BaseAgent):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-    def integrated_analysis_basic(self, market_info, product_info, founder_info):
+    def integrated_analysis_basic(
+        self,
+        market_info,
+        product_info,
+        founder_info
+    ):
         self.logger.info("Starting basic integrated analysis")
         
         user_prompt = BASIC_INTEGRATION_PROMPT.format(
@@ -34,7 +39,15 @@ class IntegrationAgent(BaseAgent):
         
         return integrated_analysis
 
-    def integrated_analysis_pro(self, market_info, product_info, founder_info, founder_idea_fit, founder_segmentation, rf_prediction):
+    def integrated_analysis_pro(
+        self,
+        market_info,
+        product_info,
+        founder_info,
+        founder_idea_fit,
+        founder_segmentation,
+        rf_prediction
+    ):
         self.logger.info("Starting pro integrated analysis")
         
         user_prompt = PRO_INTEGRATION_PROMPT.format(
@@ -51,7 +64,12 @@ class IntegrationAgent(BaseAgent):
         
         return integrated_analysis
 
-    def getquantDecision(self, rf_prediction, Founder_Idea_Fit, Founder_Segmentation):
+    def getquantDecision(
+        self,
+        rf_prediction,
+        Founder_Idea_Fit,
+        Founder_Segmentation
+    ):
         self.logger.info("Starting quantitative decision analysis")
         
         user_prompt = f"You are provided with the categorical prediction outcome of {rf_prediction}, Founder Segmentation of {Founder_Segmentation}, Founder-Idea Fit of {Founder_Idea_Fit}."

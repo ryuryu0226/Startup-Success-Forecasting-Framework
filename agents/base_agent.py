@@ -19,7 +19,7 @@ if not logging.getLogger().hasHandlers():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s')
 
 class BaseAgent:
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         self.model = model
         self.logger = logging.getLogger(__name__)
         self.logger.debug(f"Initializing BaseAgent with model: {self.model}")
