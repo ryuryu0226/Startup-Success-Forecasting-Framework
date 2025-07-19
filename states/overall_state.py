@@ -44,6 +44,3 @@ class OverallState(TypedDict):
     # Progress tracking
     progress: ProgressDict
     
-    # Workflow control
-    next_step: Optional[str]
-    should_continue: bool
