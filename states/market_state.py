@@ -1,10 +1,10 @@
 from typing import TypedDict, Optional, Any
-from shared.types import StartupInfo
+from shared.types import StartupInfoDict
 
 
 class MarketNodeInput(TypedDict):
     """Input state for market analysis node."""
-    startup_info: StartupInfo
+    startup_info: StartupInfoDict
 
 
 class MarketNodeOutput(TypedDict):

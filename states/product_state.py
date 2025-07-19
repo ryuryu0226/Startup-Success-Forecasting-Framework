@@ -1,9 +1,9 @@
 from typing import TypedDict, Optional, Any
-from shared.types import StartupInfo
+from shared.types import StartupInfoDict
 
 class ProductNodeInput(TypedDict):
     """Input state for product analysis node."""
-    startup_info: StartupInfo
+    startup_info: StartupInfoDict
 
 
 class ProductNodeOutput(TypedDict):

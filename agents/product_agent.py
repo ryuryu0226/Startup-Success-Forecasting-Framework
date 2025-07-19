@@ -15,7 +15,7 @@ from prompts.product_prompt import (
     NATURAL_LANGUAGE_ANALYSIS_PROMPT,
     KEYWORD_GENERATION_PROMPT,
 )
-from shared.types import StartupInfo
+from shared.types import StartupInfoDict
 
 class ProductAgent(BaseAgent):
     def __init__(self, model="gpt-4o"):
@@ -36,7 +36,7 @@ class ProductAgent(BaseAgent):
         self.external_knowledge_logger.addHandler(console_handler)
         self.external_knowledge_logger.setLevel(logging.INFO)
 
-    def analyze(self, startup_info: StartupInfo, mode: str) -> ProductAnalysis:
+    def analyze(self, startup_info: StartupInfoDict, mode: str) -> ProductAnalysis:
         self.logger.info(f"Starting product analysis in {mode} mode")
         product_info = self._get_product_info(startup_info)
         
@@ -88,7 +88,7 @@ class ProductAgent(BaseAgent):
         return analysis
     
 
-    def _get_external_knowledge(self, startup_info: StartupInfo) -> str:
+    def _get_external_knowledge(self, startup_info: StartupInfoDict) -> str:
         """Get structured product research from external sources"""
         self.logger.info("Starting external knowledge gathering")
         
@@ -182,7 +182,7 @@ class ProductAgent(BaseAgent):
         
         return product_report
 
-    def _generate_keywords(self, startup_info: StartupInfo) -> str:
+    def _generate_keywords(self, startup_info: StartupInfoDict) -> str:
         company_name = startup_info.get('name', '')
         prompt = f"""Generate 3-5 specific search keywords about {company_name}, starting with the company name itself.
         
@@ -215,7 +215,7 @@ class ProductAgent(BaseAgent):
         keywords = self.get_response(KEYWORD_GENERATION_PROMPT, prompt)
         return keywords
 
-    def _get_product_info(self, startup_info: StartupInfo) -> str:
+    def _get_product_info(self, startup_info: StartupInfoDict) -> str:
         return f"Product Description: {startup_info.get('product_details', '')}\n" \
                f"Key Features: {startup_info.get('product_details', '')}\n" \
                f"Technology Stack: {startup_info.get('technology_stack', '')}\n" \

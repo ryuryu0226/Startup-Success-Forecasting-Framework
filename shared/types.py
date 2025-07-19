@@ -1,4 +1,3 @@
-"""Type definitions for the SSFF framework using TypedDict."""
 from typing import TypedDict, Optional, Literal
 from datetime import datetime
 
@@ -13,7 +12,7 @@ class ProgressDict(TypedDict):
     error_message: Optional[str]
 
 
-class StartupInfo(TypedDict):
+class StartupInfoDict(TypedDict):
     """Parsed startup information."""
     name: str
     description: str
@@ -71,7 +70,7 @@ class StartupEvaluationDict(TypedDict):
 
 class VCScoutAnalysisDict(TypedDict):
     """Complete VC Scout analysis results."""
-    startup_info: StartupInfo
+    startup_info: StartupInfoDict
     categorization: StartupCategorizationDict
     evaluation: StartupEvaluationDict
 
@@ -104,8 +103,7 @@ class FounderAnalysisDict(TypedDict):
 class AdvancedFounderAnalysisDict(FounderAnalysisDict):
     """Advanced founder analysis with segmentation."""
     segmentation: int
-    cosine_similarity: float
-    idea_fit: float
+    idea_fit: tuple[float, float]
 
 
 class IntegratedAnalysisDict(TypedDict):

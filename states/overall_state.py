@@ -1,9 +1,9 @@
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from typing_extensions import Annotated, TypedDict
 import operator
 from shared.types import (
     ProgressDict,
-    StartupInfo,
+    StartupInfoDict,
     MarketAnalysisDict,
     ProductAnalysisDict,
     FounderAnalysisDict,
@@ -24,12 +24,12 @@ class OverallState(TypedDict):
     startup_info_str: str
     
     # Parsed data
-    startup_info: StartupInfo
+    startup_info: StartupInfoDict
     
     # Individual analyses
     market_analysis: Optional[MarketAnalysisDict]
     product_analysis: Optional[ProductAnalysisDict]
-    founder_analysis: Optional[FounderAnalysisDict | AdvancedFounderAnalysisDict]
+    founder_analysis: Optional[Union[FounderAnalysisDict, AdvancedFounderAnalysisDict]]
     
     # VC Scout results
     vc_prediction: Optional[str]

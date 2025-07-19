@@ -1,6 +1,7 @@
 import os
 import sys
 import numpy as np
+from typing import Union
 from sklearn.metrics.pairwise import cosine_similarity
 from tensorflow.keras.models import load_model
 
@@ -8,7 +9,7 @@ from tensorflow.keras.models import load_model
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
-from shared.types import StartupInfo
+from shared.types import StartupInfoDict
 
 from agents.base_agent import BaseAgent
 from schemas.founder_schema import FounderAnalysis, AdvancedFounderAnalysis, FounderSegmentation
@@ -26,9 +27,9 @@ class FounderAgent(BaseAgent):
 
     def analyze(
         self,
-        startup_info: StartupInfo, 
+        startup_info: StartupInfoDict, 
         mode: str,
-    ) -> FounderAnalysis | AdvancedFounderAnalysis:
+    ) -> Union[FounderAnalysis, AdvancedFounderAnalysis]:
         founder_info = self._get_founder_info(startup_info)
         
         if mode == "advanced":

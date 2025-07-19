@@ -15,10 +15,10 @@ from prompts.market_prompt import (
     NATURAL_LANGUAGE_ANALYSIS_PROMPT,
     SYNTHESIS_PROMPT
 )
-from shared.types import StartupInfo
+from shared.types import StartupInfoDict
 
 class MarketAgent(BaseAgent):
-    def __init__(self, model="gpt-4o-mini"):
+    def __init__(self, model="gpt-4o"):
         super().__init__(model)
         self.search_api = GoogleSearchAPI()
         self.logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ class MarketAgent(BaseAgent):
 
     def analyze(
         self,
-        startup_info: StartupInfo,
+        startup_info: StartupInfoDict,
         mode: str
     ) -> MarketAnalysis:
         self.logger.info(f"Starting market analysis in {mode} mode")

@@ -1,10 +1,10 @@
 from typing import TypedDict, Optional, Any
-from shared.types import StartupInfo
+from shared.types import StartupInfoDict
 
 
 class VCScoutNodeInput(TypedDict):
     """Input state for VC Scout node."""
-    startup_info: StartupInfo
+    startup_info: StartupInfoDict
 
 
 class VCScoutNodeOutput(TypedDict):
