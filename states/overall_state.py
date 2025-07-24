@@ -16,7 +16,6 @@ from shared.types import (
 
 
 class OverallState(TypedDict):
-    """Overall state shared across all nodes in the SSFF workflow."""
     # LangGraph required fields
     messages: Annotated[list[dict[str, Any]], operator.add]
     
@@ -43,4 +42,3 @@ class OverallState(TypedDict):
     
     # Progress tracking
     progress: ProgressDict
-    

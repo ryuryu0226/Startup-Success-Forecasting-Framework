@@ -1,18 +1,16 @@
-from typing import TypedDict, Optional, Any
-from shared.types import StartupInfoDict
+from typing import TypedDict, Any
+from typing_extensions import Annotated
+import operator
+from shared.types import StartupInfoDict, MarketAnalysisDict, ProgressDict
 
 
 class MarketNodeInput(TypedDict):
-    """Input state for market analysis node."""
+    messages: Annotated[list[dict[str, Any]], operator.add]
     startup_info: StartupInfoDict
+    progress: ProgressDict
 
 
 class MarketNodeOutput(TypedDict):
-    """Output state for market analysis node."""
-    market_analysis: dict[str, Any]
-    external_report: Optional[str]
-    analysis_mode: str
-    success: bool
-    error_message: Optional[str]
-    keywords_generated: Optional[str]
-    search_results_count: Optional[int]
+    messages: Annotated[list[dict[str, Any]], operator.add]
+    market_analysis: MarketAnalysisDict
+    progress: ProgressDict

@@ -1,18 +1,18 @@
 from typing import TypedDict, Optional, Any
-from shared.types import StartupInfoDict
+from typing_extensions import Annotated
+import operator
+from shared.types import StartupInfoDict, VCScoutAnalysisDict, StartupCategorizationDict, ProgressDict
 
 
 class VCScoutNodeInput(TypedDict):
-    """Input state for VC Scout node."""
+    messages: Annotated[list[dict[str, Any]], operator.add]
     startup_info: StartupInfoDict
+    progress: ProgressDict
 
 
 class VCScoutNodeOutput(TypedDict):
-    """Output state for VC Scout node."""
+    messages: Annotated[list[dict[str, Any]], operator.add]
     vc_prediction: str
-    categorization: dict[str, Any]
-    vc_evaluation: Optional[dict[str, Any]]
-    prediction_confidence: Optional[float]
-    evaluation_score: Optional[float]
-    success: bool
-    error_message: Optional[str]
+    categorization: StartupCategorizationDict
+    vc_scout_analysis: Optional[VCScoutAnalysisDict]
+    progress: ProgressDict

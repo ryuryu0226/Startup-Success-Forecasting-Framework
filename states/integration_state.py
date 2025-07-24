@@ -1,23 +1,33 @@
-from typing import TypedDict, Optional, Any
+from typing import TypedDict, Optional, Union, Any
+from typing_extensions import Annotated
+import operator
+from shared.types import (
+    MarketAnalysisDict, 
+    ProductAnalysisDict, 
+    FounderAnalysisDict, 
+    AdvancedFounderAnalysisDict,
+    StartupCategorizationDict,
+    VCScoutAnalysisDict,
+    IntegratedAnalysisDict,
+    QuantitativeDecisionDict,
+    ProgressDict
+)
 
 
 class IntegrationNodeInput(TypedDict):
-    """Input state for integration node."""
-    market_analysis: dict[str, Any]
-    product_analysis: dict[str, Any]
-    founder_analysis: dict[str, Any]
-    founder_segmentation: str
-    founder_idea_fit: float
-    vc_prediction: str
+    messages: Annotated[list[dict[str, Any]], operator.add]
+    market_analysis: Optional[MarketAnalysisDict]
+    product_analysis: Optional[ProductAnalysisDict]
+    founder_analysis: Optional[Union[FounderAnalysisDict, AdvancedFounderAnalysisDict]]
+    vc_prediction: Optional[str]
+    categorization: Optional[StartupCategorizationDict]
+    vc_scout_analysis: Optional[VCScoutAnalysisDict]
+    progress: ProgressDict
 
 
 class IntegrationNodeOutput(TypedDict):
-    """Output state for integration node."""
-    integrated_analysis: dict[str, Any]
-    integrated_analysis_basic: dict[str, Any]
-    quantitative_decision: dict[str, Any]
-    final_recommendation: Optional[str]
-    confidence_score: Optional[float]
-    risk_assessment: Optional[str]
-    success: bool
-    error_message: Optional[str]
+    messages: Annotated[list[dict[str, Any]], operator.add]
+    integrated_analysis: IntegratedAnalysisDict
+    integrated_analysis_basic: IntegratedAnalysisDict
+    quantitative_decision: QuantitativeDecisionDict
+    progress: ProgressDict
