@@ -1,6 +1,3 @@
-"""Founder analysis node for SSFF LangGraph implementation."""
-
-from typing import Dict, Any
 import os
 import sys
 
@@ -9,36 +6,37 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from nodes.base_node import BaseNode
-from states.base_state import GraphState
+from states.founder_state import FounderNodeInput, FounderNodeOutput
 from agents.founder_agent import FounderAgent
 
 class FounderNode(BaseNode):
-    """Node for founder analysis."""
-    
     def __init__(self):
         super().__init__("founder")
         self.founder_agent = None
         
-    def __call__(self, state: GraphState) -> Dict[str, Any]:
-        """Perform founder analysis."""
+    def __call__(self, input_state: FounderNodeInput) -> FounderNodeOutput:
+        # Initialize typed output
+        output = FounderNodeOutput(
+            messages=[],
+            founder_analysis={},
+            progress=input_state["progress"].copy()
+        )
+        
         try:
             # Update progress - starting
-            updates = self.update_progress(state, "started", "創業者分析を実行中...")
-            
-            # Get configuration from state
-            model = state["analysis_state"].get("model", "gpt-4o-mini")
-            mode = state["analysis_state"].get("mode", "advanced")
+            progress_msg = self._create_progress_message("started", "Analyzing founder...")
+            output["messages"].append(progress_msg)
+            output["progress"]["current_step"] = self.name
             
             # Initialize agent if not already done
             if self.founder_agent is None:
-                self.founder_agent = FounderAgent(model)
+                self.founder_agent = FounderAgent("gpt-4o-mini")
             
             # Get startup info
-            startup_info = state["analysis_state"]["startup_info"]
-            self.logger.info(f"Starting founder analysis in {mode} mode")
+            startup_info = input_state["startup_info"]
             
             # Perform founder analysis
-            founder_analysis = self.founder_agent.analyze(startup_info, mode)
+            founder_analysis = self.founder_agent.analyze(startup_info, "advanced")
             
             # Get founder backgrounds for segmentation and idea fit
             founder_backgrounds = startup_info.get("founder_backgrounds", "")
@@ -52,29 +50,46 @@ class FounderNode(BaseNode):
             # Calculate founder-idea fit
             founder_idea_fit = self.founder_agent.calculate_idea_fit(startup_info, founder_backgrounds)
             
-            # Update state with all founder-related results
-            updates["analysis_state"]["founder_analysis"] = founder_analysis.dict() if hasattr(founder_analysis, 'dict') else founder_analysis
-            updates["analysis_state"]["founder_segmentation"] = founder_segmentation
-            updates["analysis_state"]["founder_idea_fit"] = founder_idea_fit[0] if isinstance(founder_idea_fit, list) else founder_idea_fit
+            # Handle founder_idea_fit if it's a list
+            if isinstance(founder_idea_fit, list):
+                founder_idea_fit_value = founder_idea_fit[0]
+            else:
+                founder_idea_fit_value = founder_idea_fit
             
-            self.logger.info(f"Founder analysis completed - Segmentation: {founder_segmentation}, Idea Fit: {founder_idea_fit}")
+            # Convert founder_analysis to dict
+            if hasattr(founder_analysis, 'model_dump'):
+                founder_analysis_dict = founder_analysis.model_dump()
+            else:
+                founder_analysis_dict = founder_analysis
+            
+            # Add segmentation and fit data to analysis
+            founder_analysis_dict["founder_segmentation"] = founder_segmentation
+            founder_analysis_dict["founder_idea_fit"] = founder_idea_fit_value
+            
+            self.logger.info("Founder analysis completed successfully")
+            
+            # Update output
+            output["founder_analysis"] = founder_analysis_dict
             
             # Update progress - completed
-            final_updates = self.update_progress(
-                state={**state, **updates},
-                status="completed",
-                message="創業者分析が完了しました",
+            self._update_progress_completed(output["progress"])
+            complete_msg = self._create_progress_message(
+                "completed",
+                "Founder analysis completed",
                 data={
                     "segmentation": founder_segmentation,
-                    "idea_fit": founder_idea_fit[0] if isinstance(founder_idea_fit, list) else founder_idea_fit
+                    "idea_fit": founder_idea_fit_value,
+                    "competency_score": founder_analysis_dict.get("competency_score", 0)
                 }
             )
-            
-            # Merge updates
-            updates["messages"].extend(final_updates["messages"])
-            updates["analysis_state"]["progress"] = final_updates["analysis_state"]["progress"]
-            
-            return updates
+            output["messages"].append(complete_msg)
             
         except Exception as e:
-            return self.handle_error(state, e)
+            error_msg = f"Error in {self.name}: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            output["progress"]["status"] = "error"
+            output["progress"]["error_message"] = error_msg
+            error_progress = self._create_progress_message("error", error_msg)
+            output["messages"].append(error_progress)
+        
+        return output

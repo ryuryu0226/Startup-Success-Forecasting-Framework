@@ -46,7 +46,7 @@ class FounderAgent(BaseAgent):
         else:
             return self.get_json_response(FounderAnalysis, ANALYSIS_PROMPT, founder_info)
 
-    def _get_founder_info(self, startup_info: StartupInfo) -> str:
+    def _get_founder_info(self, startup_info: StartupInfoDict) -> str:
         return f"Founders' Backgrounds: {startup_info.get('founder_backgrounds', '')}\n" \
                f"Track Records: {startup_info.get('track_records', '')}\n" \
                f"Leadership Skills: {startup_info.get('leadership_skills', '')}\n" \
@@ -57,7 +57,7 @@ class FounderAgent(BaseAgent):
 
     def calculate_idea_fit(
         self,
-        startup_info: StartupInfo,
+        startup_info: StartupInfoDict,
         founder_info: str
     ) -> tuple[float, float]:
         founder_embedding = self.openai_api.get_embeddings(founder_info)

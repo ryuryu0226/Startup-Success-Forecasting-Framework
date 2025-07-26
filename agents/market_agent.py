@@ -88,13 +88,13 @@ class MarketAgent(BaseAgent):
         
         return analysis
 
-    def _get_market_info(self, startup_info: StartupInfo) -> str:
+    def _get_market_info(self, startup_info: StartupInfoDict) -> str:
         return f"Market size: {startup_info.get('market_size', '')}\n" \
                f"Competition: {startup_info.get('competition', '')}\n" \
                f"Market Growth Rate: {startup_info.get('growth_rate', '')}\n" \
                f"Market Trends: {startup_info.get('market_trends', '')}"
 
-    def _get_external_knowledge(self, startup_info: StartupInfo) -> str:
+    def _get_external_knowledge(self, startup_info: StartupInfoDict) -> str:
         """Get structured market report from external sources"""
         self.logger.info("Starting external knowledge gathering")
         
@@ -155,7 +155,7 @@ class MarketAgent(BaseAgent):
         
         return market_report
 
-    def _generate_keywords(self, startup_info: StartupInfo) -> str:
+    def _generate_keywords(self, startup_info: StartupInfoDict) -> str:
         """Generate focused market keywords for research"""
         keyword_prompt = ("You will assist me in finding external market knowledge about a startup. Think step by step. "
                          "Your task is to summarise the information into 1 keyword that best describes the market that the startup is in. "

@@ -1,6 +1,5 @@
-"""Integration node for SSFF LangGraph implementation."""
+"""Integration analysis node for SSFF LangGraph implementation."""
 
-from typing import Dict, Any
 import os
 import sys
 
@@ -9,91 +8,120 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from nodes.base_node import BaseNode
-from states.base_state import GraphState
+from states.integration_state import IntegrationNodeInput, IntegrationNodeOutput
 from agents.integration_agent import IntegrationAgent
 
 class IntegrationNode(BaseNode):
-    """Node for integrating all analyses."""
-    
     def __init__(self):
         super().__init__("integration")
         self.integration_agent = None
         
-    def __call__(self, state: GraphState) -> Dict[str, Any]:
-        """Integrate all analyses into final results."""
+    def __call__(self, input_state: IntegrationNodeInput) -> IntegrationNodeOutput:
+        # Initialize typed output
+        output = IntegrationNodeOutput(
+            messages=[],
+            integrated_analysis={},
+            integrated_analysis_basic={},
+            quantitative_decision={},
+            progress=input_state["progress"].copy()
+        )
+        
         try:
             # Update progress - starting
-            updates = self.update_progress(state, "started", "統合分析を実行中...")
-            
-            # Get configuration from state
-            model = state["analysis_state"].get("model", "gpt-4o-mini")
+            progress_msg = self._create_progress_message("started", "Integrating all analyses...")
+            output["messages"].append(progress_msg)
+            output["progress"]["current_step"] = self.name
             
             # Initialize agent if not already done
             if self.integration_agent is None:
-                self.integration_agent = IntegrationAgent(model)
+                self.integration_agent = IntegrationAgent("gpt-4o-mini")
             
-            # Get all analysis results
-            analysis_state = state["analysis_state"]
-            market_analysis = analysis_state.get("market_analysis", {})
-            product_analysis = analysis_state.get("product_analysis", {})
-            founder_analysis = analysis_state.get("founder_analysis", {})
-            founder_segmentation = analysis_state.get("founder_segmentation", "")
-            founder_idea_fit = analysis_state.get("founder_idea_fit", 0.0)
-            vc_prediction = analysis_state.get("vc_prediction", "")
+            # Get all analysis results from input state
+            market_analysis = input_state.get("market_analysis", {})
+            product_analysis = input_state.get("product_analysis", {})
+            founder_analysis = input_state.get("founder_analysis", {})
+            vc_prediction = input_state.get("vc_prediction", "")
             
-            self.logger.info("Starting integration analysis")
+            # Extract founder-specific data
+            founder_segmentation = ""
+            founder_idea_fit = 0.0
+            if founder_analysis:
+                founder_segmentation = founder_analysis.get("founder_segmentation", "")
+                founder_idea_fit = founder_analysis.get("founder_idea_fit", 0.0)
             
-            # Perform integrated analysis (advanced)
+            # Perform integrated analysis
             integrated_analysis = self.integration_agent.integrated_analysis_pro(
-                market_info=market_analysis,
-                product_info=product_analysis,
-                founder_info=founder_analysis,
-                founder_idea_fit=founder_idea_fit,
-                founder_segmentation=founder_segmentation,
-                rf_prediction=vc_prediction,
+                str(market_analysis),
+                str(product_analysis),
+                str(founder_analysis),
+                founder_idea_fit,
+                founder_segmentation,
+                vc_prediction
             )
+            
+            # Convert to dict if it's a model object
+            if hasattr(integrated_analysis, 'model_dump'):
+                integrated_analysis_dict = integrated_analysis.model_dump()
+            else:
+                integrated_analysis_dict = integrated_analysis
             
             # Perform basic integrated analysis
-            integrated_analysis_basic = self.integration_agent.integrated_analysis_basic(
-                market_info=market_analysis,
-                product_info=product_analysis,
-                founder_info=founder_analysis,
+            integrated_analysis_basic = self.integration_agent.integrated_analysis(
+                str(market_analysis),
+                str(product_analysis),
+                str(founder_analysis)
             )
+            
+            # Convert to dict if it's a model object
+            if hasattr(integrated_analysis_basic, 'model_dump'):
+                integrated_analysis_basic_dict = integrated_analysis_basic.model_dump()
+            else:
+                integrated_analysis_basic_dict = integrated_analysis_basic
             
             # Get quantitative decision
             quantitative_decision = self.integration_agent.getquantDecision(
                 vc_prediction,
                 founder_idea_fit,
-                founder_segmentation,
+                founder_segmentation
             )
             
-            # Update state with integrated results
-            updates["analysis_state"]["integrated_analysis"] = integrated_analysis.dict() if hasattr(integrated_analysis, 'dict') else integrated_analysis
-            updates["analysis_state"]["integrated_analysis_basic"] = integrated_analysis_basic.dict() if hasattr(integrated_analysis_basic, 'dict') else integrated_analysis_basic
-            updates["analysis_state"]["quantitative_decision"] = quantitative_decision.dict() if hasattr(quantitative_decision, 'dict') else quantitative_decision
+            # Convert to dict if it's a model object
+            if hasattr(quantitative_decision, 'model_dump'):
+                quantitative_decision_dict = quantitative_decision.model_dump()
+            else:
+                quantitative_decision_dict = quantitative_decision
             
             self.logger.info("Integration analysis completed successfully")
             
-            # Update progress - completed
-            final_updates = self.update_progress(
-                state={**state, **updates},
-                status="completed",
-                message="統合分析が完了しました - 全ての分析が完了",
+            # Update output
+            output["integrated_analysis"] = integrated_analysis_dict
+            output["integrated_analysis_basic"] = integrated_analysis_basic_dict
+            output["quantitative_decision"] = quantitative_decision_dict
+            
+            # Update progress to completed - mark workflow as complete
+            self._update_progress_completed(output["progress"])
+            output["progress"]["status"] = "completed"
+            complete_msg = self._create_progress_message(
+                "completed",
+                "Integration completed - Analysis finished",
                 data={
-                    "final_prediction": vc_prediction,
-                    "founder_segment": founder_segmentation,
-                    "total_steps_completed": len(analysis_state.get("progress", {}).get("completed_steps", [])) + 1
+                    "overall_score": integrated_analysis_dict.get("overall_score", 0),
+                    "outcome": integrated_analysis_dict.get("outcome", "Unknown"),
+                    "recommendation": integrated_analysis_dict.get("recommendation", "No recommendation")
                 }
             )
-            
-            # Mark workflow as completed
-            final_updates["analysis_state"]["progress"]["status"] = "completed"
-            
-            # Merge updates
-            updates["messages"].extend(final_updates["messages"])
-            updates["analysis_state"]["progress"] = final_updates["analysis_state"]["progress"]
-            
-            return updates
+            output["messages"].append(complete_msg)
             
         except Exception as e:
-            return self.handle_error(state, e)
+            error_msg = f"Error in {self.name}: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            output["progress"]["status"] = "error"
+            output["progress"]["error_message"] = error_msg
+            error_progress = self._create_progress_message("error", error_msg)
+            output["messages"].append(error_progress)
+        
+        # Add workflow control fields
+        output["should_continue"] = False
+        output["next_step"] = None
+        
+        return output

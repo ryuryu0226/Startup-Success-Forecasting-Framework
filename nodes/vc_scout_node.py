@@ -1,6 +1,3 @@
-"""VC Scout node for SSFF LangGraph implementation."""
-
-from typing import Dict, Any
 import os
 import sys
 
@@ -9,33 +6,37 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 from nodes.base_node import BaseNode
-from states.base_state import GraphState
+from states.vc_scout_state import VCScoutNodeInput, VCScoutNodeOutput
 from agents.vc_scout_agent import VCScoutAgent
 from schemas.vc_scout_schema import StartupInfo
 
 class VCScoutNode(BaseNode):
-    """Node for VC Scout evaluation and ML prediction."""
-    
     def __init__(self):
         super().__init__("vc_scout")
         self.vc_scout_agent = None
         
-    def __call__(self, state: GraphState) -> Dict[str, Any]:
-        """Perform VC Scout evaluation and ML prediction."""
+    def __call__(self, input_state: VCScoutNodeInput) -> VCScoutNodeOutput:
+        # Initialize typed output
+        output = VCScoutNodeOutput(
+            messages=[],
+            vc_prediction="",
+            categorization={},
+            vc_scout_analysis=None,
+            progress=input_state["progress"].copy()
+        )
+        
         try:
             # Update progress - starting
-            updates = self.update_progress(state, "started", "VC評価と機械学習予測を実行中...")
-            
-            # Get configuration from state
-            model = state["analysis_state"].get("model", "gpt-4o-mini")
+            progress_msg = self._create_progress_message("started", "Performing VC Scout evaluation...")
+            output["messages"].append(progress_msg)
+            output["progress"]["current_step"] = self.name
             
             # Initialize agent if not already done
             if self.vc_scout_agent is None:
-                self.vc_scout_agent = VCScoutAgent(model)
+                self.vc_scout_agent = VCScoutAgent("gpt-4o-mini")
             
             # Get startup info
-            startup_info = state["analysis_state"]["startup_info"]
-            self.logger.info("Starting VC Scout evaluation")
+            startup_info = input_state["startup_info"]
             
             # Convert to StartupInfo object if needed
             if isinstance(startup_info, dict):
@@ -43,34 +44,48 @@ class VCScoutNode(BaseNode):
             else:
                 startup_info_obj = startup_info
             
-            # Perform VC evaluation
-            vc_evaluation = self.vc_scout_agent.evaluate(startup_info_obj, "advanced")
-            
-            # Perform side evaluation (categorization and ML prediction)
+            # Perform VC Scout evaluation
             prediction, categorization = self.vc_scout_agent.side_evaluate(startup_info_obj)
             
-            # Update state with results
-            updates["analysis_state"]["vc_prediction"] = prediction
-            updates["analysis_state"]["categorization"] = categorization.dict() if hasattr(categorization, 'dict') else categorization
+            # Perform additional VC Scout analysis if available
+            vc_scout_analysis = None
+            try:
+                # Try to get more detailed VC analysis if method exists
+                if hasattr(self.vc_scout_agent, 'detailed_analysis'):
+                    vc_scout_analysis = self.vc_scout_agent.detailed_analysis(startup_info_obj)
+                    if hasattr(vc_scout_analysis, 'model_dump'):
+                        vc_scout_analysis = vc_scout_analysis.model_dump()
+            except Exception as e:
+                self.logger.warning(f"Detailed VC analysis not available: {e}")
             
-            self.logger.info(f"VC Scout evaluation completed - Prediction: {prediction}")
+            # Convert categorization to dict
+            if hasattr(categorization, 'model_dump'):
+                categorization_dict = categorization.model_dump()
+            else:
+                categorization_dict = categorization
+            
+            self.logger.info(f"VC Scout evaluation completed: {prediction}")
+            
+            # Update output
+            output["vc_prediction"] = prediction
+            output["categorization"] = categorization_dict
+            output["vc_scout_analysis"] = vc_scout_analysis
             
             # Update progress - completed
-            final_updates = self.update_progress(
-                state={**state, **updates},
-                status="completed",
-                message="VC評価と機械学習予測が完了しました",
-                data={
-                    "prediction": prediction,
-                    "evaluation_score": vc_evaluation.dict().get("overall_potential_score", "N/A") if hasattr(vc_evaluation, 'dict') else "N/A"
-                }
+            self._update_progress_completed(output["progress"])
+            complete_msg = self._create_progress_message(
+                "completed",
+                "VC Scout evaluation completed",
+                data={"prediction": prediction}
             )
-            
-            # Merge updates
-            updates["messages"].extend(final_updates["messages"])
-            updates["analysis_state"]["progress"] = final_updates["analysis_state"]["progress"]
-            
-            return updates
+            output["messages"].append(complete_msg)
             
         except Exception as e:
-            return self.handle_error(state, e)
+            error_msg = f"Error in {self.name}: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            output["progress"]["status"] = "error"
+            output["progress"]["error_message"] = error_msg
+            error_progress = self._create_progress_message("error", error_msg)
+            output["messages"].append(error_progress)
+        
+        return output

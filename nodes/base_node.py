@@ -26,7 +26,6 @@ class BaseNode:
         message: str,
         data: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
-        """Update progress information in the state."""
         current_time = datetime.now()
 
         # Create progress update for messages
@@ -68,6 +67,29 @@ class BaseNode:
         error_message = f"Error in {self.name}: {str(error)}"
         self.logger.error(error_message, exc_info=True)
         return self.update_progress(state, "error", error_message)
+    
+    def _create_progress_message(
+        self,
+        status: Literal["started", "completed", "error"],
+        message: str,
+        data: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """Create a progress message."""
+        return ProgressUpdate(
+            node_name=self.name,
+            status=status,
+            message=message,
+            timestamp=time.time(),
+            data=data
+        ).model_dump()
+    
+    def _update_progress_completed(self, progress: dict) -> None:
+        """Update progress dict for completion."""
+        current_time = datetime.now()
+        if self.name not in progress.get("completed_steps", []):
+            progress["completed_steps"] = progress.get("completed_steps", []) + [self.name]
+        if self.name in progress.get("step_times", {}):
+            progress["step_times"][self.name]["end"] = current_time
     
     def __call__(self, state: OverallState) -> dict[str, Any]:
         """Execute the node. Must be implemented by subclasses."""
