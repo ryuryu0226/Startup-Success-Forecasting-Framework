@@ -62,9 +62,9 @@ class FounderNode(BaseNode):
             else:
                 founder_analysis_dict = founder_analysis
             
-            # Add segmentation and fit data to analysis
-            founder_analysis_dict["founder_segmentation"] = founder_segmentation
-            founder_analysis_dict["founder_idea_fit"] = founder_idea_fit_value
+            # Add segmentation and fit data to analysis (convert to AdvancedFounderAnalysisDict)
+            founder_analysis_dict["segmentation"] = founder_segmentation
+            founder_analysis_dict["idea_fit"] = (founder_idea_fit_value, 0.0)  # Convert to tuple format
             
             self.logger.info("Founder analysis completed successfully")
             

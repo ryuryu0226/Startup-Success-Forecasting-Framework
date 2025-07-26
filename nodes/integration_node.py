@@ -46,8 +46,13 @@ class IntegrationNode(BaseNode):
             founder_segmentation = ""
             founder_idea_fit = 0.0
             if founder_analysis:
-                founder_segmentation = founder_analysis.get("founder_segmentation", "")
-                founder_idea_fit = founder_analysis.get("founder_idea_fit", 0.0)
+                founder_segmentation = founder_analysis.get("segmentation", "")
+                # Handle idea_fit tuple format
+                idea_fit_data = founder_analysis.get("idea_fit", (0.0, 0.0))
+                if isinstance(idea_fit_data, tuple):
+                    founder_idea_fit = idea_fit_data[0]
+                else:
+                    founder_idea_fit = idea_fit_data
             
             # Perform integrated analysis
             integrated_analysis = self.integration_agent.integrated_analysis_pro(
@@ -119,9 +124,5 @@ class IntegrationNode(BaseNode):
             output["progress"]["error_message"] = error_msg
             error_progress = self._create_progress_message("error", error_msg)
             output["messages"].append(error_progress)
-        
-        # Add workflow control fields
-        output["should_continue"] = False
-        output["next_step"] = None
         
         return output
