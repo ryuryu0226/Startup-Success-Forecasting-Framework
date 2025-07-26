@@ -12,6 +12,7 @@ from shared.types import (
     QuantitativeDecisionDict,
     ProgressDict
 )
+from shared.reducers import merge_progress
 
 
 class IntegrationNodeInput(TypedDict):
@@ -22,7 +23,7 @@ class IntegrationNodeInput(TypedDict):
     vc_prediction: Optional[str]
     categorization: Optional[StartupCategorizationDict]
     vc_scout_analysis: Optional[VCScoutAnalysisDict]
-    progress: ProgressDict
+    progress: Annotated[ProgressDict, merge_progress]
 
 
 class IntegrationNodeOutput(TypedDict):
@@ -30,4 +31,4 @@ class IntegrationNodeOutput(TypedDict):
     integrated_analysis: IntegratedAnalysisDict
     integrated_analysis_basic: IntegratedAnalysisDict
     quantitative_decision: QuantitativeDecisionDict
-    progress: ProgressDict
+    progress: Annotated[ProgressDict, merge_progress]

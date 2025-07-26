@@ -1,6 +1,7 @@
 from typing import Any, Optional, Union
 from typing_extensions import Annotated, TypedDict
 import operator
+from shared.reducers import merge_progress
 from shared.types import (
     ProgressDict,
     StartupInfoDict,
@@ -41,4 +42,4 @@ class OverallState(TypedDict):
     quantitative_decision: Optional[QuantitativeDecisionDict]
     
     # Progress tracking
-    progress: ProgressDict
+    progress: Annotated[ProgressDict, merge_progress]
