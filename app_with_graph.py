@@ -250,26 +250,43 @@ def analyze_startup_with_stream(
                     st.json(data)
             
     except Exception as e:
-        st.error(f"An error occurred during analysis: {str(e)}")
-        st.write(traceback.format_exc())
+        st.error("❌ **Analysis Failed**")
+        st.error(f"**Error:** {str(e)}")
+        
+        # Show user-friendly error information
+        with st.expander("🔧 Technical Details (for debugging)", expanded=False):
+            st.write("**Error Type:**", type(e).__name__)
+            st.write("**Error Message:**", str(e))
+            st.code(traceback.format_exc(), language="python")
+        
+        # Show helpful suggestions
+        st.info("💡 **Suggestions:**")
+        st.write("- Check if all required API keys are set in your `.env` file")
+        st.write("- Verify the startup information format")
+        st.write("- Try with a shorter description if the input is very long")
+        st.write("- Check the console/logs for more detailed error information")
 
 def display_final_results(final_state: dict[str, Any]) -> None:
     """Display the final analysis results."""
-    st.subheader("Final Analysis Results")
-    
-    # Debug: Show what keys are available in final_state
-    with st.expander("Debug: Available Keys in Final State", expanded=False):
-        st.write("Keys in final_state:")
-        for key, value in final_state.items():
-            if isinstance(value, dict) and value:
-                st.write(f"✅ **{key}**: {type(value)} (has data)")
-            elif value:
-                st.write(f"✅ **{key}**: {type(value)} = {value}")
-            else:
-                st.write(f"❌ **{key}**: {type(value)} (empty/None)")
-    
-    # Create tabs for different sections
-    tabs = st.tabs(["Summary", "Market Analysis", "Product Analysis", "Founder Analysis", "VC Scout", "Details"])
+    try:
+        st.subheader("Final Analysis Results")
+        
+        # Debug: Show what keys are available in final_state
+        with st.expander("Debug: Available Keys in Final State", expanded=False):
+            st.write("Keys in final_state:")
+            for key, value in final_state.items():
+                if isinstance(value, dict) and value:
+                    st.write(f"✅ **{key}**: {type(value)} (has data)")
+                elif value:
+                    st.write(f"✅ **{key}**: {type(value)} = {value}")
+                else:
+                    st.write(f"❌ **{key}**: {type(value)} (empty/None)")
+        
+        # Create tabs for different sections
+        tabs = st.tabs(["Summary", "Market Analysis", "Product Analysis", "Founder Analysis", "VC Scout", "Details"])
+    except Exception as e:
+        st.error(f"Error setting up results display: {str(e)}")
+        return
     
     with tabs[0]:  # Summary
         if final_state.get("integrated_analysis"):
@@ -329,23 +346,49 @@ def display_final_results(final_state: dict[str, Any]) -> None:
             st.write(product.get('usp_assessment', 'N/A'))
     
     with tabs[3]:  # Founder Analysis
-        if final_state.get("founder_analysis"):
-            founder = final_state["founder_analysis"]
-            
-            st.metric("Competency Score", f"{founder.get('competency_score', 'N/A')}/10")
-            
-            # Check for advanced founder analysis
-            if founder.get("segmentation"):
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Founder Segmentation", f"L{founder['segmentation']}")
-                with col2:
-                    idea_fit = founder.get("idea_fit", (0.0, 0.0))
-                    if isinstance(idea_fit, tuple):
-                        st.metric("Founder-Idea Fit", f"{idea_fit[0]:.4f}")
-            
-            st.write("**Analysis:**")
-            st.write(founder.get('analysis', 'N/A'))
+        try:
+            if final_state.get("founder_analysis"):
+                founder = final_state["founder_analysis"]
+                
+                st.metric("Competency Score", f"{founder.get('competency_score', 'N/A')}/10")
+                
+                # Check for advanced founder analysis
+                if founder.get("segmentation"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Founder Segmentation", f"L{founder['segmentation']}")
+                    with col2:
+                        idea_fit = founder.get("idea_fit", (0.0, 0.0))
+                        try:
+                            if isinstance(idea_fit, tuple) and len(idea_fit) > 0:
+                                # Handle nested tuples or other complex structures
+                                fit_item = idea_fit[0]
+                                if isinstance(fit_item, (int, float)):
+                                    fit_value = float(fit_item)
+                                    st.metric("Founder-Idea Fit", f"{fit_value:.4f}")
+                                elif isinstance(fit_item, tuple) and len(fit_item) > 0:
+                                    # Handle double-nested tuple
+                                    fit_value = float(fit_item[0])
+                                    st.metric("Founder-Idea Fit", f"{fit_value:.4f}")
+                                else:
+                                    st.write(f"**Founder-Idea Fit:** {fit_item} (type: {type(fit_item)})")
+                            elif isinstance(idea_fit, (int, float)):
+                                st.metric("Founder-Idea Fit", f"{float(idea_fit):.4f}")
+                            else:
+                                st.write(f"**Founder-Idea Fit:** {idea_fit} (type: {type(idea_fit)})")
+                        except Exception as e:
+                            st.error(f"Error displaying Founder-Idea Fit: {str(e)}")
+                            st.write(f"**Debug - idea_fit value:** {idea_fit}")
+                            st.write(f"**Debug - idea_fit type:** {type(idea_fit)}")
+                
+                st.write("**Analysis:**")
+                st.write(founder.get('analysis', 'N/A'))
+            else:
+                st.info("No founder analysis data available")
+        except Exception as e:
+            st.error(f"Error displaying Founder Analysis: {str(e)}")
+            with st.expander("Debug Info", expanded=False):
+                st.write(f"founder_analysis data: {final_state.get('founder_analysis', 'Not found')}")
     
     with tabs[4]:  # VC Scout
         if final_state.get("vc_prediction"):
