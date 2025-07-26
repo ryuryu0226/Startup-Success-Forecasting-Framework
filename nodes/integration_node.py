@@ -71,7 +71,7 @@ class IntegrationNode(BaseNode):
                 integrated_analysis_dict = integrated_analysis
             
             # Perform basic integrated analysis
-            integrated_analysis_basic = self.integration_agent.integrated_analysis(
+            integrated_analysis_basic = self.integration_agent.integrated_analysis_basic(
                 str(market_analysis),
                 str(product_analysis),
                 str(founder_analysis)
